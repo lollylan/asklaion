@@ -11,7 +11,7 @@ import wave
 import librosa
 import datetime
 
-# Check for GPU
+# Check for GPU, prefer CUDA if available
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load Whisper model
