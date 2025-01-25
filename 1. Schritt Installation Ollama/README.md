@@ -31,10 +31,10 @@ Man kommt jetzt auf die Seite des Models, hier gibt es viele Informationen, die 
 
 Diesen Text kann man einfach markieren und mir STRG + C kopieren, oder man klickt das kleine Symbol rechts.
 
-Jetzt kommt der Schritt, der eventuell etwas gruselig ist. Man öffnet die sogenannte Eingabeaufforderung (oder bei Macs das Terminal). Und das geht folgendermaßen
+Jetzt kommt der Schritt, der eventuell etwas gruselig ist. Man öffnet die sogenannte Eingabeaufforderung (oder bei Macs das Terminal). Die Eingabeaufforderung (bei Windows) oder das Terminal (bei Macs) ist ein Programm, in dem man Befehle direkt in Textform eingibt, um deinem Computer Aufgaben zu geben. Es sieht zwar ein bisschen wie im Film "Die Matrix" aus, ist aber ganz einfach. Und das geht folgendermaßen:
 1. Windowstaste drücken
-2. Den Text "cmd" eingeben (ohne Anführungszeichen). Bei Macs statt dessen die Terminal-App starten
-3. JEtzt den kopierten Text von der Ollama-Website einfach mit STRG + V einfügen.
+2. Den Text "cmd" eingeben (ohne Anführungszeichen) und Enter drücken. Bei Macs statt dessen die Terminal-App starten.
+3. Jetzt den kopierten Text `ollama run llama3.2` von der Ollama-Website einfach mit STRG + V einfügen. 
 
 ![cmd-1](images/cmd1.png)
 
@@ -46,4 +46,4 @@ Und schon ist man essentiell fertig, man kann direkt mit dem LLM reden. Versuche
 
 ![cmd-3](images/cmd3.png)
 
-Natürlich ist diese Art der Interaktion mit dem LLM umständlich und ungewohnt, aber jetzt wissen wir, dass es läuft und können uns jetzt um eine angenehmere Benutzeroberfläche kümmern.
+Natürlich ist diese Art der Interaktion mit dem LLM umständlich und ungewohnt, aber jetzt wissen wir, dass es läuft und können uns jetzt im 2. Schritt um eine angenehmere Benutzeroberfläche kümmern wie z.B. [Openweb UI](https://github.com/open-webui/open-webui).

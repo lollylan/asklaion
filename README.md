@@ -9,8 +9,8 @@ Diese Github-Seite ist eine Sammelstelle für alles, was hierfür wichtig ist. J
 ### Erste Schritte
 
 1. Wir empfehlen, zunächst im Ordner "Beispielanwendungen" zu starten, um einen ersten Eindruck zu bekommen. 
-2. Danach kann man, wenn man einfach einmal ausprobieren will, wie das System funktioniert, der Anleitung im Ordner "Erstinstallation zu Hause" Schritt für Schritt folgen, um das System ohne großen Aufwand auf nahezu jedem Computer/Laptop/Macbook etc. einmal auszuprobieren.
-3. Wenn man das System in der Praxis ausprobiert werden soll, braucht man dafür einen Rechner mit einer guten Grafikkarte, Empfehlungen werden im entsprechenden Unterordner gegeben. Dann muss man nur noch der Anleitung "Erstinstallation in der Praxis" folgen, die minimal mehr technisches Wissen erfordert, und schon macht die Sprechstunde wieder mehr Spaß.
+2. Danach kann man, wenn man einfach einmal ausprobieren will, wie das System funktioniert, der Anleitung im Ordner "1. Schritt Installation Ollama" und danach der Anleitung "2. Schritt Installation OpenwebUI zu Hause" folgen, um das System ohne großen Aufwand auf nahezu jedem Computer/Laptop/Macbook etc. einmal auszuprobieren.
+3. Wenn man das System in der Praxis ausprobiert werden soll, braucht man dafür einen Rechner mit einer guten Grafikkarte, Empfehlungen werden im entsprechenden Unterordner gegeben. Dann muss man nur noch der Anleitung "1. Schritt Installation Ollama" und dann "2. Schritt Installation OpenwebUI in der Praxis" folgen, die minimal mehr technisches Wissen erfordert, und schon macht die Sprechstunde wieder mehr Spaß.
 4. Weitere Module wie z.B. die Whisper-Transkriptionssoftware sind vollkommen optional, können aber den Ablauf und die Ergebnisse deutlich verbessern.
 
 ### Wichtig
