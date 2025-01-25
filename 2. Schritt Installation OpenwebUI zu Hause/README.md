@@ -4,6 +4,12 @@ Nachdem im ersten Schritt Ollama und ein Modell installiert wurde, folgt jetzt d
 
 Es gibt eine einfachere und eine etwas kompliziertere Variante. Zum Ausprobieren daheim wird hier die leichte Variante erklärt, die etwas kompliziertere ist dann für die Praxis geeignet, da hier mehr und fortgeschrittenere Optionen bestehen.
 
+## Videoanleitung
+
+[![Thumbnail](https://img.youtube.com/vi/db5SGBJgKvU/maxresdefault.jpg)](https://youtu.be/db5SGBJgKvU)
+
+## Installation mit Pinokio
+
 Auf der Website https://pinokio.computer/ wird Pinokio heruntergeladen und wie jedes normale Programm installiert und gestartet. pinokio.computer ist ein Program, die eine Sammlung von KI-Tools bietet, mit denen Nutzer verschiedene Aufgaben erledigen können, wie z.B. das Erstellen von Texten oder das Bearbeiten von Bildern, alles direkt im Browser. Es richtet sich an Leute, die ohne viel Aufwand mit Künstlicher Intelligenz arbeiten möchten.
 
 ![PinokioDownload](images/image.png)
