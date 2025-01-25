@@ -2,6 +2,11 @@
 
 Eine lokale KI zum Laufen zu bringen ist erstaunlich einfach, ein paar Installationsschritte sehen evtl. etwas gruselig aus für Leute, die noch nie das Terminal benutzt haben, aber wir versprechen, es ist überhaupt nicht so schlimm.
 
+## Videoanleitung
+
+[![Thumbnail](https://img.youtube.com/vi/3Etn50LpOvY/maxresdefault.jpg)](https://youtu.be/3Etn50LpOvY)
+
+
 ## Installation Ollama
 
 Ollama ist das Herzstück der lokalen KI und läuft im Hintergrund. Auf [www.ollama.com](https://ollama.com/) einfach auf Download klicken, das jeweilige Betriebssystem auswählen und wie gewohnt dem Installationsprozess folgen.
