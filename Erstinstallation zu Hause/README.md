@@ -14,7 +14,14 @@ Ollama ist nur das Grundgerüst und selbst noch keine KI. Man muss sich jetzt ei
 
 ![Modeldownload](images/modeldownload.png)
 
-Am Besten ist für den Anfang ein kleines Modell geeignet, das läuft auf schwachen Rechnern auch deutlich flüssiger. Die Größe des Modells erkennt man an der B-Zahl. 1B-3B sind z.B. sehr kleine Modelle die sogar auf Handys funktionieren würden, 7B-14B mittelgroße Modelle, die auf Rechnern mit einer relativ neuen Grafikkarte laufen, 20B-30B-Modelle laufen nur auf sehr guten Grafikkarten flüssig. Noch größere Modelle sind - zumindest für unsere Zwecke - unpraktikabel, da sie sehr teure Server benötigen. Aber wie gesagt, zum Start fangen wir klein an, z.B. mit llama3.2 in der 3B Variante. Hierzu einfach llama3.2 aus der Liste auswählen oder auf [www.ollama.com/library/llama3.2](https://ollama.com/library/llama3.2) klicken.
+Am Besten ist für den Anfang ein kleines Modell geeignet, das läuft auf schwachen Rechnern auch deutlich flüssiger. Die Größe eines Modells wird in Milliarden von Parametern (B) angegeben. Größere Modelle sind leistungsstärker, benötigen aber auch mehr Rechenressourcen.
+
+- Kleine Modelle (1B - 3B): Diese Modelle sind ideal für Geräte mit geringerer Rechenleistung, wie z.B. ältere Rechner oder Smartphones. Sie bieten eine solide Leistung und sind die beste Wahl, wenn du schnelle Ergebnisse bei geringeren Anforderungen erzielen möchtest. Diese Modelle sind in der Regel die schnellsten und ressourcenschonendsten.
+- Mittelgroße Modelle (7B - 14B): Diese Modelle sind für durchschnittlich leistungsstarke Computer geeignet, insbesondere für Rechner mit moderner Grafikkarte (GPU). Sie bieten eine gute Balance zwischen Leistung und Ressourcenverbrauch und sind gut geeignet für die meisten Anwendungen.
+- Große Modelle (20B - 30B): Diese Modelle bieten eine hohe Leistung und sind am besten für sehr leistungsfähige Maschinen mit guter GPU geeignet. Sie liefern die detailliertesten und präzisesten Ergebnisse, können jedoch nur auf High-End-Systemen flüssig laufen.
+- Sehr große Modelle (größer als 30B): Diese Modelle sind für spezialisierte, hochleistungsfähige Server oder Cloud-Dienste gedacht. Sie erfordern enorm viel Rechenleistung und sind für die meisten Benutzer nicht praktikabel.
+
+Aber wie gesagt, zum Start fangen wir klein an, z.B. mit llama3.2 in der 3B Variante. Hierzu einfach llama3.2 aus der Liste auswählen oder auf [www.ollama.com/library/llama3.2](https://ollama.com/library/llama3.2) klicken.
 
 ![Model](images/model.png)
 
