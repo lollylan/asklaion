@@ -14,6 +14,8 @@ Ollama ist nur das Grundgerüst und selbst noch keine KI. Man muss sich jetzt ei
 
 ![Modeldownload](images/modeldownload.png)
 
+![Model](images/model.png)
+
 Am Besten ist für den Anfang ein kleines Modell geeignet, das läuft auf schwachen Rechnern auch deutlich flüssiger. Die Größe eines Modells wird in Milliarden von Parametern (B) angegeben. Größere Modelle sind leistungsstärker, benötigen aber auch mehr Rechenressourcen.
 
 - Kleine Modelle (1B - 3B): Diese Modelle sind ideal für Geräte mit geringerer Rechenleistung, wie z.B. ältere Rechner oder Smartphones. Sie bieten eine solide Leistung und sind die beste Wahl, wenn du schnelle Ergebnisse bei geringeren Anforderungen erzielen möchtest. Diese Modelle sind in der Regel die schnellsten und ressourcenschonendsten.
@@ -22,8 +24,6 @@ Am Besten ist für den Anfang ein kleines Modell geeignet, das läuft auf schwac
 - Sehr große Modelle (größer als 30B): Diese Modelle sind für spezialisierte, hochleistungsfähige Server oder Cloud-Dienste gedacht. Sie erfordern enorm viel Rechenleistung und sind für die meisten Benutzer nicht praktikabel.
 
 Aber wie gesagt, zum Start fangen wir klein an, z.B. mit llama3.2 in der 3B Variante. Hierzu einfach llama3.2 aus der Liste auswählen oder auf [www.ollama.com/library/llama3.2](https://ollama.com/library/llama3.2) klicken.
-
-![Model](images/model.png)
 
 Man kommt jetzt auf die Seite des Models, hier gibt es viele Informationen, die uns aktuell nicht interessieren. Das einzige relevante ist dieser Kasten:
 
