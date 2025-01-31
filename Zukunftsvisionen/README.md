@@ -8,9 +8,10 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ---
 
-### 2. **Unterstützung bei medizinischen Entscheidungen**  
+### 2. :warning: **Unterstützung bei medizinischen Entscheidungen**  
    - Bereitstellung von evidenzbasierten Leitlinien und Studien zur Therapieentscheidung.
    - Vorschläge für differenzialdiagnostische Überlegungen.
+   - :warning: Cave: Medizinprodukt!
 
 ---
 
@@ -38,15 +39,17 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ---
 
-### 7. **Analyse und Auswertung von Patientendaten**  
+### 7. :warning: **Analyse und Auswertung von Patientendaten**  
    - Identifikation von Risikopatienten basierend auf Laborwerten und Symptomen.
    - Mustererkennung bei häufigen Beschwerden oder Krankheitsverläufen.
+   - :warning: Cave: Medizinprodukt!
 
 ---
 
-### 8. **Palliativmedizinische Unterstützung**  
+### 8. :warning: **Palliativmedizinische Unterstützung**  
    - Unterstützung bei der Symptomkontrolle durch Empfehlungen für Schmerz- und Symptommanagement.
    - Hilfe bei der Formulierung von individuellen Behandlungsplänen.
+   - :warning: Cave: Medizinprodukt!
 
 ---
 
@@ -62,7 +65,7 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ---
 
-### 11. **Zusammenfassung von externen Arztbriefen**  
+### 11. :white_check_mark: **Zusammenfassung von externen Arztbriefen**  
    - Nach dem Selbststudium eine Kurzzusammenfassung für den Übertrag ins PVS zum schnellen Screening des Inhaltes von Arztbriefen erstellen
 
 ---
