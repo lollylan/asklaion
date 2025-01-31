@@ -22,4 +22,4 @@ Weiterhin ist wichtig, das Askl-AI-on im Endeffekt lediglich ein angepasstes LLM
 
 ### Warum Github?
 
-Github sieht vor Allem für Neulinge etwas gruselig aus, das ist uns bewusst. Allerdings ist Github de facto DIE Anlaufstelle für open-source-Software und ermöglicht auch das Zusammenarbeiten zur gemeinsamen Verbesserung von Askl-AI-on. Und so kompliziert ist es im Prinzip auch nicht, einfach in der 
+Github sieht vor Allem für Neulinge etwas gruselig aus, das ist uns bewusst. Allerdings ist Github de facto DIE Anlaufstelle für open-source-Software und ermöglicht auch das Zusammenarbeiten zur gemeinsamen Verbesserung von Askl-AI-on. Und so kompliziert ist es im Prinzip auch nicht, einfach in der Liste oben die Kategorie auswählen, die relevant ist und den Text lesen/die Video schauen.
