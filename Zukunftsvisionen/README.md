@@ -4,7 +4,7 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ### 1. :white_check_mark: **Automatisierte Dokumentation von Arzt-Patienten-Gesprächen**  
    - Protokollierung der Anamnese, des Befundes, der Diagnose und des Therapieplans in Echtzeit.
-   - Formatierte Übergabe für die digitale Patientenakte.
+   - Formatierte Übergabe für die digitale Patientenakte..
 
 ---
 
