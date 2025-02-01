@@ -8,32 +8,32 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ---
 
-### 2. :warning: **Unterstützung bei medizinischen Entscheidungen**  
+### 2. :black_square_button: :warning: **Unterstützung bei medizinischen Entscheidungen**  
    - Bereitstellung von evidenzbasierten Leitlinien und Studien zur Therapieentscheidung.
    - Vorschläge für differenzialdiagnostische Überlegungen.
    - :warning: Cave: Medizinprodukt!
 
 ---
 
-### 3. **Erstellung und Verwaltung von Vorlagen**  
+### 3. :black_square_button: **Erstellung und Verwaltung von Vorlagen**  
    - Automatisches Erstellen von Arztbriefen, Attesten und Überweisungen.
    - Dynamische Anpassung der Texte basierend auf Diagnosen und Befunden.
 
 ---
 
-### 4. **Terminplanung und Patientenmanagement**  
+### 4. :black_square_button: **Terminplanung und Patientenmanagement**  
    - Unterstützung bei der Organisation und Priorisierung von Terminen, z. B. für Palliativpatienten.
    - Erinnerungssysteme für Kontroll- und Vorsorgeuntersuchungen.
 
 ---
 
-### 5. **Sprachsteuerung und -eingabe**  
+### 5. :black_square_button: **Sprachsteuerung und -eingabe**  
    - Ermöglichung einer sprachgesteuerten Dokumentation und Navigation im Praxisverwaltungssystem.
    - Verkürzung der Zeit für manuelle Eingaben und Tipparbeit.
 
 ---
 
-### 6. **Gesundheitserziehung und Patientenaufklärung**  
+### 6. :black_square_button: **Gesundheitserziehung und Patientenaufklärung**  
    - Bereitstellung leicht verständlicher Informationen zu Erkrankungen, Medikamenten und Therapieoptionen.
    - Individualisierte Informationsblätter für Patienten erstellen.
 
@@ -53,15 +53,15 @@ Die Anwendung von lokaler KI kann - korrekt implementiert - viele Abläufe in de
 
 ---
 
-### 9. **Datenschutzkonforme Kommunikation**  
+### 9. :black_square_button: **Datenschutzkonforme Kommunikation**  
    - Erstellen verschlüsselter und DSGVO-konformer Nachrichten oder Berichte.
    - Automatische Zusammenfassung für den interdisziplinären Austausch (z. B. mit Pflegepersonal).
 
 ---
 
-### 10. **Training und Fortbildung des Praxisteams**  
-   - Simulation von Fallbesprechungen zur Schulung medizinischer Fachangestellter und Assistenzärzte.
-   - Zugriff auf aktuelle medizinische Lehrinhalte und Simulationstools.
+### 10. :black_square_button: **Training und Fortbildung des Praxisteams**  
+   - :white_check_mark: Simulation von Fallbesprechungen zur Schulung medizinischer Fachangestellter und Assistenzärzte.
+   - :black_square_button: Zugriff auf aktuelle medizinische Lehrinhalte und Simulationstools.
 
 ---
 
