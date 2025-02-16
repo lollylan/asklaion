@@ -9,3 +9,7 @@ Hier finden Sie ein paar Videobeispiele von AsklAIon in Aktion, die Ausgabe ist 
 [![Thumbnail](https://img.youtube.com/vi/bajxvOB3fXI/maxresdefault.jpg)](https://youtu.be/bajxvOB3fXI)
 
 [![Thumbnail](https://img.youtube.com/vi/J0u48evM7Eg/maxresdefault.jpg)](https://youtu.be/J0u48evM7Eg)
+
+[![Thumbnail](https://img.youtube.com/vi/SguGqJL8aZk/maxresdefault.jpg)](https://youtu.be/SguGqJL8aZk)
+
+[![Thumbnail](https://img.youtube.com/vi/GDuqdU06qrE/maxresdefault.jpg)](https://youtu.be/GDuqdU06qrE)
