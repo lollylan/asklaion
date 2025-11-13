@@ -1,0 +1,3 @@
+# Analyse von eingehenden Dokumenten
+
+Wer kennt es nicht? Das PVS hat einen Faxeingangsordner, alle Faxe heißen genau gleich und ein/e MFA muss händisch jedes Fax umbenennen, um ein bisschen Ordnung zu schaffen? Die eingehenden KIM-Nachrichten heißen nur Arztbrief.pdf oder tragen irgend einen Phantasienamen und lassen sich im Nachhinein in der Patientenakte realistisch nicht wieder finden. Die Lösung? Analyse durch ein LLM und Vergabe eines sinnvollen Namens - und das voll automatisiert.
