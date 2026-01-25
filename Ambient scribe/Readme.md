@@ -18,9 +18,9 @@ Sobald die Basisinstallation läuft, können Sie je nach gewünschtem Automatisi
 
 | Modul | Inhalt & Zweck | Fokus |
 | --- | --- | --- |
-| **[Askl-AI-on in OpenwebUI](https://www.google.com/search?q=./openwebui-integration)** | Nutzung der Weboberfläche mit spezifischen **System-Prompts** für die Hausarztpraxis. | Manuelle Eingabe / Kopieren |
-| **[Transkription via Whisper](https://www.google.com/search?q=./whisper-transkription)** | Einrichtung von OpenAI Whisper (lokal), um Audioaufnahmen in Text umzuwandeln. | Audio-zu-Text |
-| **[Komplettscript (Beispiel PegaMed)](https://www.google.com/search?q=./pvs-integration-pegamed)** | Ein End-to-End Skript, das Audio aufnimmt, transkribiert und für das PVS **PegaMed** aufbereitet. | Vollautomatisierung |
+| **Askl-AI-on in OpenwebUI** | Nutzung der Weboberfläche mit spezifischen **System-Prompts** für die Hausarztpraxis. | Manuelle Eingabe / Kopieren |
+| **Transkription via Whisper** | Einrichtung von OpenAI Whisper (lokal), um Audioaufnahmen in Text umzuwandeln. | Audio-zu-Text |
+| **Komplettscript (Beispiel PegaMed)** | Ein End-to-End Skript, das Audio aufnimmt, transkribiert und für das PVS **PegaMed** aufbereitet. | Vollautomatisierung |
 
 
 ---
