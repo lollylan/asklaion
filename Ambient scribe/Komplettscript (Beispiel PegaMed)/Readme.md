@@ -7,9 +7,10 @@ Dieses Modul bietet eine "One-Click"-Lösung für die Dokumentation. Es verknüp
 ## 📋 Funktionsweise
 
 1. **Audioaufnahme:** Der Client nimmt das Gespräch am Behandlungsplatz auf.
-2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPT statt, um in der GPU mehr Platz für ein größeres LLM zu haben.
-3. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell (`asklaion-v1`) die medizinische Zusammenfassung erstellt.
-4. **PegaMed-Optimierung:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in PegaMed mit `Strg + V` korrekt eingefügt werden können.
+2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPU statt, um in der GPU mehr Platz für ein größeres LLM zu haben. Das Script nutzt Whisper Medium.
+3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweißt, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss seperat installiert werden) nutzt. Dieses Nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen.
+4. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell (`asklaion-v1`) die medizinische Zusammenfassung erstellt.
+5. **PegaMed-Optimierung:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in PegaMed mit `Strg + V` korrekt eingefügt werden können.
 
 ---
 
