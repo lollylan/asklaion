@@ -9,7 +9,7 @@ Dieses Modul bietet eine "One-Click"-Lösung für die Dokumentation. Es verknüp
 1. **Audioaufnahme:** Der Client nimmt das Gespräch am Behandlungsplatz auf.
 2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPU statt, um in der GPU mehr Platz für ein größeres LLM zu haben. Das Script nutzt Whisper Medium.
 3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweißt, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss seperat installiert werden) nutzt. Dieses Nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen.
-4. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell (`asklaion-v1`) die medizinische Zusammenfassung erstellt.
+4. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell (`asklaion-v1`) die medizinische Zusammenfassung erstellt oder das Diktat verbessert (`diktiersklave-v1`).
 5. **PegaMed-Optimierung:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in PegaMed mit `Strg + V` korrekt eingefügt werden können.
 
 ---
@@ -55,10 +55,12 @@ Dieses Skript läuft auf einem Server im Praxisnetzwerk. Es nutzt das Modell "me
 ### B. OpenWebUI-Vorbereitung
 
 1. **Modell erstellen:** Erstellen Sie in Ihrer OpenWebUI-Instanz ein neues Modell mit dem Namen `asklaion-v1`.
-2. **System-Prompt:** Hinterlegen Sie Ihren gewünschten medizinischen System-Prompt direkt in den Einstellungen dieses Modells in OpenWebUI.
-3. **API-Key:** Generieren Sie in Ihrem OpenWebUI-Profil einen API-Key.
+2. **System-Prompt:** Hinterlegen Sie Ihren gewünschten medizinischen System-Prompt direkt in den Einstellungen dieses Modells in OpenWebUI (Beispiel siehe "Prompt Asklaion V1.txt).
+3. **Modell erstellen:** Erstellen Sie in Ihrer OpenWebUI-Instanz ein neues Modell mit dem Namen `Diktiersklave`.
+4. **System-Prompt:** Hinterlegen Sie Ihren gewünschten Diktat-Prompt direkt in den Einstellungen dieses Modells in OpenWebUI (Beispiel siehe "Prompt Diktiersklave V1.txt).
+5. **API-Key:** Generieren Sie in Ihrem OpenWebUI-Profil einen API-Key.
 
-### C. Client-Setup (`Komplettscript2.py`)
+### C. Client-Setup (`Komplettscript4.py`)
 
 Passen Sie die Variablen im Bereich `CONFIGURATION` an:
 
