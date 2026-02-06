@@ -1,0 +1,24 @@
+Wandle die folgenden ICD-10-Daten um:
+Jede Zeile enthält einen ICD-10-Code und die zugehörige Beschreibung, getrennt durch ein Semikolon.
+Erstelle eine JSON-Ausgabe im Array-Format, in der jedes Objekt zwei Felder hat:
+
+Code: enthält den ICD-10-Code.
+Krankheit: enthält die Beschreibung des Codes.
+Beispielinput:
+
+
+A00;Cholera
+A00.0;Cholera durch Vibrio cholerae O:1, Biovar cholerae
+Erwartete JSON-Ausgabe:
+
+json
+  {
+    "Code": "A00",
+    "Krankheit": "Cholera"
+  },
+  {
+    "Code": "A00.0",
+    "Krankheit": "Cholera durch Vibrio cholerae O:1, Biovar cholerae"
+  }
+
+Verarbeite alle Daten aus der Datei entsprechend diesem Muster

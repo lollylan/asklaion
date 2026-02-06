@@ -1,0 +1,1089 @@
+[
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Ibuprofen",
+            "Dolormin",
+            "Nurofen",
+            "Brufen",
+            "IbuHexal",
+            "Advil",
+            "Motrin",
+            "Brufen Retard",
+            "Ibuflam"
+        ],
+        "Wirkstoff": "Ibuprofen",
+        "Anwendungsbereich": "Schmerzen, Entzündungen, Fieber",
+        "Wirkstoffklasse": "NSAR",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Paracetamol",
+            "Ben-u-ron",
+            "Tylenol",
+            "Panadol",
+            "Mexalen",
+            "Paracetamol STADA",
+            "Apotel",
+            "Sanmol",
+            "Dafalgan"
+        ],
+        "Wirkstoff": "Paracetamol",
+        "Anwendungsbereich": "Schmerzen, Fieber",
+        "Wirkstoffklasse": "Nichtopioid-Analgetikum",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Metamizol",
+            "Novalgin",
+            "Analgin",
+            "Algopyrin",
+            "Novaminsulfon",
+            "Spasmalgon",
+            "Novamid",
+            "Metamizol Aristo",
+            "Berlosin"
+        ],
+        "Wirkstoff": "Metamizol",
+        "Anwendungsbereich": "Schmerzen, Krämpfe, Fieber",
+        "Wirkstoffklasse": "Nichtopioid-Analgetikum",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Opioid-Analgetika",
+        "Handelsname": [
+            "Tramadol",
+            "Tramal",
+            "Zaldiar",
+            "Adolonta",
+            "Tramadolor",
+            "Contramal",
+            "Tramagit",
+            "Tralodie",
+            "Tramal retard"
+        ],
+        "Wirkstoff": "Tramadol",
+        "Anwendungsbereich": "Mittelstarke bis starke Schmerzen",
+        "Wirkstoffklasse": "Opioid-Analgetikum",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Opioid-Analgetika",
+        "Handelsname": [
+            "Oxycodon",
+            "Oxygesic",
+            "Targin",
+            "OxyNorm",
+            "OxyContin",
+            "Oxynorm",
+            "OxyContin CR",
+            "Oxygesic retard",
+            "Lynlor"
+        ],
+        "Wirkstoff": "Oxycodon",
+        "Anwendungsbereich": "Starke Schmerzen",
+        "Wirkstoffklasse": "Opioid-Analgetikum",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Amoxicillin",
+            "Augmentin",
+            "Amoxypen",
+            "Amopen",
+            "Clamoxyl",
+            "Amoclav",
+            "Hiconcil",
+            "Amoxicillin-Mepha",
+            "Amoxybeta"
+        ],
+        "Wirkstoff": "Amoxicillin",
+        "Anwendungsbereich": "Bakterielle Infektionen",
+        "Wirkstoffklasse": "Penicilline",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Ciprofloxacin",
+            "Ciproxin",
+            "Ciprobay",
+            "Cetraxal",
+            "Ciprodura",
+            "CiproHEXAL",
+            "Ciprobeta",
+            "Cetraxal Plus",
+            "Ciflox"
+        ],
+        "Wirkstoff": "Ciprofloxacin",
+        "Anwendungsbereich": "Harnwegsinfekte, Atemwegsinfekte",
+        "Wirkstoffklasse": "Fluorchinolone",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Doxycyclin",
+            "Vibramycin",
+            "Doxakne",
+            "Vibravenös",
+            "DoxyDerm",
+            "Doxycost",
+            "Doximed",
+            "DoxyHEXAL",
+            "Doxy 200"
+        ],
+        "Wirkstoff": "Doxycyclin",
+        "Anwendungsbereich": "Bakterielle Infektionen, Akne",
+        "Wirkstoffklasse": "Tetracycline",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Azithromycin",
+            "Zithromax",
+            "Azithrocin",
+            "Azithral",
+            "Zmax",
+            "Azimed",
+            "Azyth",
+            "Azimex",
+            "Azibiot"
+        ],
+        "Wirkstoff": "Azithromycin",
+        "Anwendungsbereich": "Atemwegsinfekte, Chlamydieninfektionen",
+        "Wirkstoffklasse": "Makrolide",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Ramipril",
+            "Delix",
+            "RamiLich",
+            "Ramipril comp",
+            "Delix protect",
+            "Tritace",
+            "Prilace",
+            "Ramimed",
+            "Cardace"
+        ],
+        "Wirkstoff": "Ramipril",
+        "Anwendungsbereich": "Bluthochdruck, Herzinsuffizienz",
+        "Wirkstoffklasse": "ACE-Hemmer",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Bisoprolol",
+            "Concor",
+            "Bisoprolol-ratiopharm",
+            "ConcorCor",
+            "Bisobeta",
+            "Bisocard",
+            "Bisoprolol-Mepha",
+            "Bisoprolol STADA",
+            "Cardicor"
+        ],
+        "Wirkstoff": "Bisoprolol",
+        "Anwendungsbereich": "Bluthochdruck, Herzinsuffizienz",
+        "Wirkstoffklasse": "Betablocker",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Amlodipin",
+            "Norvasc",
+            "Amlovas",
+            "AmloHEXAL",
+            "Norvax",
+            "Amlodipin-Mepha",
+            "Amlo-Denk",
+            "Amlor",
+            "Norvas"
+        ],
+        "Wirkstoff": "Amlodipin",
+        "Anwendungsbereich": "Bluthochdruck, Angina Pectoris",
+        "Wirkstoffklasse": "Calciumkanalblocker",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Valsartan",
+            "Diovan",
+            "Valsacor",
+            "Diovan HCT",
+            "Valtan",
+            "Valsartan Zentiva",
+            "Valsaar",
+            "Valtensin",
+            "Tareg"
+        ],
+        "Wirkstoff": "Valsartan",
+        "Anwendungsbereich": "Bluthochdruck, Herzinsuffizienz",
+        "Wirkstoffklasse": "Angiotensin-II-Rezeptorantagonisten",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Metformin",
+            "Glucophage",
+            "Siofor",
+            "Glucophage XR",
+            "Janumet (mit Sitagliptin)",
+            "Metformin AL",
+            "Formin",
+            "Diaformin",
+            "Metformin-ratiopharm"
+        ],
+        "Wirkstoff": "Metformin",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "Biguanide",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Insulin glargin",
+            "Lantus",
+            "Toujeo",
+            "Abasaglar",
+            "Basaglar",
+            "Basaglar KwikPen",
+            "Toujeo SoloStar",
+            "Insulin Glargine Winthrop",
+            "Optisulin"
+        ],
+        "Wirkstoff": "Insulin glargin",
+        "Anwendungsbereich": "Diabetes mellitus",
+        "Wirkstoffklasse": "Insuline",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Empagliflozin",
+            "Jardiance",
+            "Synjardy (mit Metformin)",
+            "Glyxambi (mit Linagliptin)",
+            "Qtern",
+            "Jardiance Duo",
+            "Steglatro",
+            "Segluromet",
+            "Suglat"
+        ],
+        "Wirkstoff": "Empagliflozin",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "SGLT-2-Hemmer",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Sitagliptin",
+            "Januvia",
+            "Xelevia",
+            "Ristaben",
+            "JanuMet (mit Metformin)",
+            "Efficib (mit Metformin)",
+            "Janumed",
+            "Xelevia XR",
+            "Sitagliptin Zentiva"
+        ],
+        "Wirkstoff": "Sitagliptin",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "DPP-4-Hemmer",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Inhalativa",
+        "Handelsname": [
+            "Salbutamol",
+            "Ventolin",
+            "SalbuHEXAL",
+            "Ventilastin",
+            "Buventol",
+            "Asmadol",
+            "Salbuvent",
+            "Salbutol",
+            "Asthalin"
+        ],
+        "Wirkstoff": "Salbutamol",
+        "Anwendungsbereich": "Asthma, COPD",
+        "Wirkstoffklasse": "Beta-2-Sympathomimetika",
+        "Nebenwirkungen": [
+            "Reizungen im Mund- und Rachenraum",
+            "Heiserkeit",
+            "Tremor"
+        ]
+    },
+    {
+        "Kategorie": "Inhalativa",
+        "Handelsname": [
+            "Budesonid",
+            "Pulmicort",
+            "Symbicort (mit Formoterol)",
+            "Budecort",
+            "Miflonide",
+            "Entocort",
+            "Budehaler",
+            "Budiair",
+            "Novopulmon"
+        ],
+        "Wirkstoff": "Budesonid",
+        "Anwendungsbereich": "Asthma, COPD",
+        "Wirkstoffklasse": "Inhalative Kortikosteroide",
+        "Nebenwirkungen": [
+            "Reizungen im Mund- und Rachenraum",
+            "Heiserkeit",
+            "Tremor"
+        ]
+    },
+    {
+        "Kategorie": "Inhalativa",
+        "Handelsname": [
+            "Tiotropium",
+            "Spiriva",
+            "Spiolto Respimat",
+            "TioHEXAL",
+            "Braltus",
+            "Inspiolto",
+            "TioLich",
+            "Tiogiva",
+            "Tioneb"
+        ],
+        "Wirkstoff": "Tiotropium",
+        "Anwendungsbereich": "COPD",
+        "Wirkstoffklasse": "Anticholinergika",
+        "Nebenwirkungen": [
+            "Reizungen im Mund- und Rachenraum",
+            "Heiserkeit",
+            "Tremor"
+        ]
+    },
+    {
+        "Kategorie": "Protonenpumpenhemmer",
+        "Handelsname": [
+            "Pantoprazol",
+            "Pantozol",
+            "Pantoloc",
+            "Pantozol Control",
+            "AntraPro",
+            "Pantomed",
+            "Pantogamma",
+            "Pantoprazol Aristo",
+            "Protium"
+        ],
+        "Wirkstoff": "Pantoprazol",
+        "Anwendungsbereich": "Gastroösophageale Refluxkrankheit, Gastritis",
+        "Wirkstoffklasse": "Protonenpumpenhemmer",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Durchfall",
+            "Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Protonenpumpenhemmer",
+        "Handelsname": [
+            "Omeprazol",
+            "Antra",
+            "Losec",
+            "Omepradex",
+            "Omep HEXAL",
+            "Omep-Mundipharma",
+            "Omepra",
+            "Omezol",
+            "Omec HEXAL"
+        ],
+        "Wirkstoff": "Omeprazol",
+        "Anwendungsbereich": "Gastroösophageale Refluxkrankheit, Magengeschwüre",
+        "Wirkstoffklasse": "Protonenpumpenhemmer",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Durchfall",
+            "Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antidepressiva",
+        "Handelsname": [
+            "Citalopram",
+            "Cipramil",
+            "Cipramil",
+            "Seropram",
+            "Citalopram AL",
+            "Celexa",
+            "Citalogen",
+            "Citalostad",
+            "Citonorm"
+        ],
+        "Wirkstoff": "Citalopram",
+        "Anwendungsbereich": "Depressionen, Angststörungen",
+        "Wirkstoffklasse": "SSRI",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Gewichtszunahme",
+            "Mundtrockenheit"
+        ]
+    },
+    {
+        "Kategorie": "Antidepressiva",
+        "Handelsname": [
+            "Venlafaxin",
+            "Trevilor",
+            "Effexor",
+            "Venlafaxin-ratiopharm",
+            "Viepax",
+            "Efectin",
+            "Venlift",
+            "Vensir",
+            "Vencarm"
+        ],
+        "Wirkstoff": "Venlafaxin",
+        "Anwendungsbereich": "Depressionen, Angststörungen",
+        "Wirkstoffklasse": "SNRI",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Gewichtszunahme",
+            "Mundtrockenheit"
+        ]
+    },
+    {
+        "Kategorie": "Antidepressiva",
+        "Handelsname": [
+            "Mirtazapin",
+            "Remergil",
+            "Mirtabene",
+            "Remeron",
+            "Miro",
+            "Mirtaron",
+            "MirtaLich",
+            "Mirzaten",
+            "Mirap"
+        ],
+        "Wirkstoff": "Mirtazapin",
+        "Anwendungsbereich": "Depressionen",
+        "Wirkstoffklasse": "Tetrazyklische Antidepressiva",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Gewichtszunahme",
+            "Mundtrockenheit"
+        ]
+    },
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Diclofenac",
+            "Voltaren",
+            "Diclac",
+            "Flector",
+            "Voltaren Dolo",
+            "Dicloreum",
+            "Diclobene",
+            "DicloRatiopharm",
+            "Flector EP"
+        ],
+        "Wirkstoff": "Diclofenac",
+        "Anwendungsbereich": "Schmerzen, Entzündungen",
+        "Wirkstoffklasse": "NSAR",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Naproxen",
+            "Dolormin für Frauen",
+            "Dolormin GS",
+            "Proxen",
+            "Naprosyn",
+            "Aleve",
+            "Nalgesin",
+            "Naprox HEXAL",
+            "Naproduct"
+        ],
+        "Wirkstoff": "Naproxen",
+        "Anwendungsbereich": "Schmerzen, Entzündungen",
+        "Wirkstoffklasse": "NSAR",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Opioid-Analgetika",
+        "Handelsname": [
+            "Tilidin",
+            "Valoron",
+            "Valoron N",
+            "Tilidin-ratiopharm",
+            "Tilcenon",
+            "Tilial",
+            "Valoron retard",
+            "TilBETA",
+            "Til-Ratiopharm"
+        ],
+        "Wirkstoff": "Tilidin",
+        "Anwendungsbereich": "Starke Schmerzen",
+        "Wirkstoffklasse": "Opioid-Analgetikum",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Clarithromycin",
+            "Klacid",
+            "ClariHEXAL",
+            "Klaricid",
+            "Clabact",
+            "Fromilid",
+            "Klarmin",
+            "ClariMed",
+            "Clarithrobeta"
+        ],
+        "Wirkstoff": "Clarithromycin",
+        "Anwendungsbereich": "Atemwegsinfekte, Hautinfektionen",
+        "Wirkstoffklasse": "Makrolide",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Cefuroxim",
+            "Zinnat",
+            "CefuHEXAL",
+            "Zinnat forte",
+            "Cefutil",
+            "Zinnacef",
+            "Cefurox Aristo",
+            "CefuHEXAL forte",
+            "Elobact"
+        ],
+        "Wirkstoff": "Cefuroxim",
+        "Anwendungsbereich": "Harnwegsinfekte, Atemwegsinfekte",
+        "Wirkstoffklasse": "Cephalosporine",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Phenoxymethylpenicillin",
+            "InfectoCillin",
+            "Isocillin",
+            "Pen V",
+            "V-Penicillin",
+            "PenHexal",
+            "Penicillin V beta",
+            "Phenocillin",
+            "Pen-Vee-K"
+        ],
+        "Wirkstoff": "Phenoxymethylpenicillin",
+        "Anwendungsbereich": "Tonsillitis, Scharlach",
+        "Wirkstoffklasse": "Penicilline",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Lisinopril",
+            "Acerbon",
+            "Acerbon comp",
+            "Zestril",
+            "Lisinopril AL",
+            "Listril",
+            "Lisigamma",
+            "Lisodura",
+            "Zestoretic"
+        ],
+        "Wirkstoff": "Lisinopril",
+        "Anwendungsbereich": "Bluthochdruck, Herzinsuffizienz",
+        "Wirkstoffklasse": "ACE-Hemmer",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Hydrochlorothiazid",
+            "HCT",
+            "HCT AL",
+            "Esidrix",
+            "HCT Sandoz",
+            "HCT-Mepha",
+            "Hydrex",
+            "HydroDenk",
+            "Hydrosaluretil"
+        ],
+        "Wirkstoff": "Hydrochlorothiazid",
+        "Anwendungsbereich": "Bluthochdruck, Ödeme",
+        "Wirkstoffklasse": "Diuretika",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antihypertensiva",
+        "Handelsname": [
+            "Nebivolol",
+            "Nebilet",
+            "Nebilet plus",
+            "Nebicard",
+            "Nebivolol AL",
+            "Nebilong",
+            "Nebiratio",
+            "Nebivelox",
+            "Vasoxen"
+        ],
+        "Wirkstoff": "Nebivolol",
+        "Anwendungsbereich": "Bluthochdruck, Herzinsuffizienz",
+        "Wirkstoffklasse": "Betablocker",
+        "Nebenwirkungen": [
+            "Kopfschmerzen",
+            "Müdigkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Glimepirid",
+            "Amaryl",
+            "Amaril",
+            "GlimeHEXAL",
+            "Diamel",
+            "Glimebeta",
+            "GlimeHEXAL forte",
+            "Diapirid",
+            "Glimisave"
+        ],
+        "Wirkstoff": "Glimepirid",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "Sulfonylharnstoffe",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Diabetesmedikamente",
+        "Handelsname": [
+            "Dulaglutid",
+            "Trulicity",
+            "Trulicity Pen",
+            "Ozempic (Alternativ GLP-1)",
+            "Ozempic (Alternative)",
+            "Suliqua (Kombination)",
+            "DulaPlus",
+            "Dulagence"
+        ],
+        "Wirkstoff": "Dulaglutid",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "GLP-1-Rezeptoragonisten",
+        "Nebenwirkungen": [
+            "Hypoglykämie",
+            "Magen-Darm-Beschwerden",
+            "Gewichtszunahme"
+        ]
+    },
+    {
+        "Kategorie": "Antipsychotika",
+        "Handelsname": [
+            "Olanzapin",
+            "Zyprexa",
+            "ZypAdhera",
+            "Zalasta",
+            "Olanzapin-ratiopharm",
+            "Zypadhera",
+            "Olazin",
+            "Olanibeta",
+            "Olazax"
+        ],
+        "Wirkstoff": "Olanzapin",
+        "Anwendungsbereich": "Schizophrenie, bipolare Störungen",
+        "Wirkstoffklasse": "Atypische Antipsychotika",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antipsychotika",
+        "Handelsname": [
+            "Quetiapin",
+            "Seroquel",
+            "Sequase",
+            "Qutylin",
+            "QuetiHEXAL",
+            "Qutipin",
+            "Seroquel XR",
+            "Quetialan",
+            "Quetimax"
+        ],
+        "Wirkstoff": "Quetiapin",
+        "Anwendungsbereich": "Schizophrenie, bipolare Störungen",
+        "Wirkstoffklasse": "Atypische Antipsychotika",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antidepressiva",
+        "Handelsname": [
+            "Amitriptylin",
+            "Saroten",
+            "Saroten retard",
+            "Elavil",
+            "Amineurin",
+            "Tryptizol",
+            "Laroxyl",
+            "Triptyn",
+            "Amitrip Ratiopharm"
+        ],
+        "Wirkstoff": "Amitriptylin",
+        "Anwendungsbereich": "Depressionen, neuropathische Schmerzen",
+        "Wirkstoffklasse": "Trizyklische Antidepressiva",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Gewichtszunahme",
+            "Mundtrockenheit"
+        ]
+    },
+    {
+        "Kategorie": "Inhalativa",
+        "Handelsname": [
+            "Fluticason",
+            "Flutide",
+            "Flixotide",
+            "Avamys",
+            "FluticAir",
+            "Flixonase",
+            "Avamys nasal",
+            "FlutiHEXAL",
+            "FlutiRatiopharm"
+        ],
+        "Wirkstoff": "Fluticason",
+        "Anwendungsbereich": "Asthma, COPD",
+        "Wirkstoffklasse": "Inhalative Kortikosteroide",
+        "Nebenwirkungen": [
+            "Reizungen im Mund- und Rachenraum",
+            "Heiserkeit",
+            "Tremor"
+        ]
+    },
+    {
+        "Kategorie": "Inhalativa",
+        "Handelsname": [
+            "Formoterol",
+            "Foradil",
+            "Foradile",
+            "Oxis Turbuhaler",
+            "Atimos",
+            "Formodual",
+            "Duovent",
+            "Oxis Respimat",
+            "Foratec"
+        ],
+        "Wirkstoff": "Formoterol",
+        "Anwendungsbereich": "Asthma, COPD",
+        "Wirkstoffklasse": "Beta-2-Sympathomimetika",
+        "Nebenwirkungen": [
+            "Reizungen im Mund- und Rachenraum",
+            "Heiserkeit",
+            "Tremor"
+        ]
+    },
+    {
+        "Kategorie": "Schmerzmittel",
+        "Handelsname": [
+            "Etoricoxib",
+            "Arcoxia",
+            "Algix",
+            "Arcoxi",
+            "Tauxib",
+            "Etofree",
+            "Arcofri",
+            "Arcozox",
+            "Artezia"
+        ],
+        "Wirkstoff": "Etoricoxib",
+        "Anwendungsbereich": "Arthritis, Schmerzen",
+        "Wirkstoffklasse": "COX-2-Hemmer",
+        "Nebenwirkungen": [
+            "Magen-Darm-Beschwerden",
+            "Übelkeit",
+            "Schwindel"
+        ]
+    },
+    {
+        "Kategorie": "Antidiabetika",
+        "Handelsname": [
+            "Pioglitazon",
+            "Actos",
+            "Actoplus Met",
+            "Competact",
+            "Glustin",
+            "Piobeta",
+            "Piomed",
+            "Actoglit",
+            "Piosafe"
+        ],
+        "Wirkstoff": "Pioglitazon",
+        "Anwendungsbereich": "Typ-2-Diabetes",
+        "Wirkstoffklasse": "Thiazolidindione",
+        "Nebenwirkungen": [
+            "Allgemeine Nebenwirkungen wie Kopfschmerzen, Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antiepileptika",
+        "Handelsname": [
+            "Levetiracetam",
+            "Keppra",
+            "Keppra XR",
+            "Levetiracetam AL",
+            "Elepsia",
+            "Levetirex",
+            "Levesil",
+            "Levex",
+            "Levetiracetam Zentiva"
+        ],
+        "Wirkstoff": "Levetiracetam",
+        "Anwendungsbereich": "Epilepsie",
+        "Wirkstoffklasse": "Antiepileptika",
+        "Nebenwirkungen": [
+            "Schläfrigkeit",
+            "Schwindel",
+            "Koordinationsstörungen"
+        ]
+    },
+    {
+        "Kategorie": "Antikoagulanzien",
+        "Handelsname": [
+            "Dabigatran",
+            "Pradaxa",
+            "Pradax",
+            "Dabigatran AL",
+            "DabiHEXAL",
+            "Dabigamma",
+            "Pradaxa XR",
+            "Dabigo",
+            "Dabicor"
+        ],
+        "Wirkstoff": "Dabigatran",
+        "Anwendungsbereich": "Thromboseprophylaxe, Vorhofflimmern",
+        "Wirkstoffklasse": "Direkte Thrombin-Inhibitoren",
+        "Nebenwirkungen": [
+            "Blutungen",
+            "Hämatome",
+            "Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antikoagulanzien",
+        "Handelsname": [
+            "Rivaroxaban",
+            "Xarelto",
+            "Xarelto plus",
+            "Rivabax",
+            "Rivastix",
+            "Rivaxin",
+            "Rivarox HEXAL",
+            "Rivabeta",
+            "Xarelto protect"
+        ],
+        "Wirkstoff": "Rivaroxaban",
+        "Anwendungsbereich": "Thromboseprophylaxe, Vorhofflimmern",
+        "Wirkstoffklasse": "Faktor-Xa-Inhibitoren",
+        "Nebenwirkungen": [
+            "Blutungen",
+            "Hämatome",
+            "Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Lipidsenker",
+        "Handelsname": [
+            "Rosuvastatin",
+            "Crestor",
+            "Rosuvastatin Zentiva",
+            "Crestor plus",
+            "RosuLich",
+            "Rovista",
+            "Rozeta",
+            "Rosulib",
+            "Rosustar"
+        ],
+        "Wirkstoff": "Rosuvastatin",
+        "Anwendungsbereich": "Hypercholesterinämie",
+        "Wirkstoffklasse": "Statine",
+        "Nebenwirkungen": [
+            "Muskelschmerzen",
+            "Leberfunktionsstörungen",
+            "Übelkeit"
+        ]
+    },
+    {
+        "Kategorie": "Antibiotika",
+        "Handelsname": [
+            "Meropenem",
+            "Meronem",
+            "Meronem IV",
+            "Meropenem HEXAL",
+            "MeroLich",
+            "MeroPenta",
+            "Meroflan",
+            "Meropenem Kabi",
+            "Merocrit"
+        ],
+        "Wirkstoff": "Meropenem",
+        "Anwendungsbereich": "Schwere bakterielle Infektionen",
+        "Wirkstoffklasse": "Carbapeneme",
+        "Nebenwirkungen": [
+            "Durchfall",
+            "Übelkeit",
+            "Allergische Reaktionen"
+        ]
+    },
+    {
+        "Kategorie": "Antihistaminika",
+        "Handelsname": [
+            "Loratadin",
+            "Claritine",
+            "Lorano",
+            "Claritin",
+            "LoranoPro",
+            "LoraHEXAL",
+            "Lorafix",
+            "Loralin",
+            "Loratamed"
+        ],
+        "Wirkstoff": "Loratadin",
+        "Anwendungsbereich": "Allergien, Heuschnupfen",
+        "Wirkstoffklasse": "H1-Antihistaminika",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Kopfschmerzen",
+            "Mundtrockenheit"
+        ]
+    },
+    {
+        "Kategorie": "Antihistaminika",
+        "Handelsname": [
+            "Cetirizin",
+            "Zyrtec",
+            "Zyrtec duo",
+            "Cetirizindura",
+            "CetiHEXAL",
+            "Allergex",
+            "CetiriMepha",
+            "Cetrine",
+            "Cetirxal"
+        ],
+        "Wirkstoff": "Cetirizin",
+        "Anwendungsbereich": "Allergien, Heuschnupfen",
+        "Wirkstoffklasse": "H1-Antihistaminika",
+        "Nebenwirkungen": [
+            "Müdigkeit",
+            "Kopfschmerzen",
+            "Mundtrockenheit"
+        ]
+    }
+]
