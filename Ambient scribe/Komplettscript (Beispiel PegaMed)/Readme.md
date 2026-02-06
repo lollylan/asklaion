@@ -8,7 +8,7 @@ Dieses Modul bietet eine "One-Click"-Lösung für die Dokumentation. Es verknüp
 
 1. **Audioaufnahme:** Der Client nimmt das Gespräch am Behandlungsplatz auf.
 2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPU statt, um in der GPU mehr Platz für ein größeres LLM zu haben. Das Script nutzt Whisper Medium.
-3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweißt, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss seperat installiert werden) nutzt. Dieses Nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen.
+3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweißt, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss seperat installiert werden) nutzt. Dieses Nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen. Wenn mehrere Behandler gleichzeitig die KI-Transkription nutzen wollen bitte das Script server_GPU_Cuda_Parallel.py nutzen, damit die Diktate nicht "vermischt" werden.
 4. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell (`asklaion-v1`) die medizinische Zusammenfassung erstellt oder das Diktat verbessert (`diktiersklave-v1`).
 5. **PegaMed-Optimierung:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in PegaMed mit `Strg + V` korrekt eingefügt werden können.
 
@@ -44,7 +44,7 @@ pip install sounddevice numpy requests scipy pyperclip
 
 ## ⚙️ Konfiguration
 
-Damit die Automatisierung funktioniert, müssen Sie die Dateien `server_Gemini_CPU.py` und `Komplettscript2.py` anpassen:
+Damit die Automatisierung funktioniert, müssen Sie die Dateien `server_Gemini_CPU.py` (oder die jeweilige Server-Datei) und `Komplettscript4.py` anpassen:
 
 ### A. Server-Setup (`server_Gemini_CPU.py`)
 
@@ -73,7 +73,7 @@ Passen Sie die Variablen im Bereich `CONFIGURATION` an:
 ## 🚀 Nutzung im Praxisalltag
 
 1. **Server starten:** Führen Sie `python server_Gemini_CPU.py` auf Ihrem Server aus.
-2. **Client starten:** Starten Sie `python Komplettscript2.py` auf Ihrem Praxis-PC.
+2. **Client starten:** Starten Sie `python Komplettscript4.py` auf Ihrem Praxis-PC.
 3. **Dokumentieren:**
 * Klicken Sie auf **Aufnahme Starten**.
 * Nutzen Sie während des Gesprächs die Buttons für **Normbefunde** (z. B. "Lunge", "Abdomen"), um Standard-Untersuchungsergebnisse per Klick einzufügen.
