@@ -1,0 +1,8 @@
+Transkripte_Raw/
+config.json
+__pycache__/
+*.pyc
+
+Vorversionen/
+
+Ambient scribe/Komplettscript/Vorversionen/

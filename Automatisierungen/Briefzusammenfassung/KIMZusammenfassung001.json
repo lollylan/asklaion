@@ -1,0 +1,182 @@
+{
+  "name": "KIM Arztbriefe Zusammenfassung",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b7b2f006-49e6-471f-a759-fa5c3f382397",
+      "name": "Manuell starten",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\\\Users\\\\lolly\\\\Desktop\\\\KIM\\\\*.pdf",
+        "options": {}
+      },
+      "id": "aedcbae3-d52d-47e4-8cf4-4d0af1dceefe",
+      "name": "KIM PDFs lesen",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "2736b38b-55cd-4f00-9201-2217aaa29764",
+      "name": "Text extrahieren",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Hole den extrahierten Text\nconst arztbriefText = $input.item.json.text || '';\n\n// Erstelle den Prompt\nconst prompt = `Du bist ein medizinischer Assistent. Fasse den folgenden Arztbrief präzise auf Deutsch zusammen.\n\nAnforderungen:\n- 80-120 Wörter in Fließtext\n- Erwähne: Absender (Fachrichtung und Name, NICHT Dr. Rasche), Aufnahmegrund, Diagnosen, Maßnahmen, Medikation\n- Erfinde NICHTS, nutze NUR Informationen aus dem Brief\n- KEINE Überschriften oder Metadaten\n\nARZTBRIEF:\n${arztbriefText}\n\nZUSAMMENFASSUNG:`;\n\n// Erstelle das Ollama Request Body\nconst requestBody = {\n  model: \"gemma3:27b\",\n  prompt: prompt,\n  stream: false,\n  temperature: 0.1\n};\n\nreturn {\n  json: {\n    requestBody: requestBody\n  }\n};"
+      },
+      "id": "prepare-request-123456",
+      "name": "Request vorbereiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.requestBody }}",
+        "options": {}
+      },
+      "id": "ollama-direct-call-1234567890",
+      "name": "Ollama API Aufruf",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -80,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse die Ollama-Response\nconst response = $input.item.json;\nlet zusammenfassung = '';\n\nif (response.response) {\n  zusammenfassung = response.response.trim();\n} else {\n  zusammenfassung = 'FEHLER: Keine Antwort von Ollama erhalten.\\n\\n' + JSON.stringify(response, null, 2);\n}\n\n// Hole den Original-Dateinamen\nconst originalFileName = $('KIM PDFs lesen').item.binary.data.fileName;\nconst fileNameWithoutExt = originalFileName.replace(/\\.pdf$/i, '');\nconst txtFileName = fileNameWithoutExt + '_zusammenfassung.txt';\nconst filePath = `C:\\\\Users\\\\lolly\\\\Desktop\\\\KIM\\\\${txtFileName}`;\n\n// Erstelle Binary-Objekt\nreturn {\n  json: {\n    fileName: txtFileName,\n    filePath: filePath,\n    preview: zusammenfassung.substring(0, 200)\n  },\n  binary: {\n    data: {\n      data: Buffer.from(zusammenfassung, 'utf-8').toString('base64'),\n      mimeType: 'text/plain',\n      fileName: txtFileName,\n      fileExtension: 'txt'\n    }\n  }\n};"
+      },
+      "id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "name": "Datei vorbereiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6a7-5b6c-9d0e-1f2a3b4c5d6e",
+      "name": "Zusammenfassung speichern",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        368,
+        272
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manuell starten": {
+      "main": [
+        [
+          {
+            "node": "KIM PDFs lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KIM PDFs lesen": {
+      "main": [
+        [
+          {
+            "node": "Text extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Request vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Ollama API Aufruf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama API Aufruf": {
+      "main": [
+        [
+          {
+            "node": "Datei vorbereiten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datei vorbereiten": {
+      "main": [
+        [
+          {
+            "node": "Zusammenfassung speichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "00214dc2-5520-4d2e-ab9a-ac81b294d10b",
+  "meta": {
+    "instanceId": "cb78821b62061571ea19fb3a8220488d720f4dcfe82424bb9506b473b908f5a5"
+  },
+  "id": "OwlAw5bdowS2lPAJ",
+  "tags": []
+}
