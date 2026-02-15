@@ -1,75 +1,88 @@
 # Askl-AI-on
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Lokale KI-Lösungen für die moderne Hausarztpraxis – Sicher, Open-Source und On-Premise.**
 
-Willkommen bei **Askl-AI-on**. Dieses Projekt ist eine kuratierte Sammlung von Anleitungen, Skripten und Workflows, die darauf abzielen, den administrativen Alltag in der Hausarztpraxis durch den Einsatz künstlicher Intelligenz zu entlasten – ohne dabei sensible Patientendaten in die Cloud zu schicken.
+Willkommen bei **Askl-AI-on**. Dieses Projekt ist eine kuratierte Sammlung von Anleitungen, Skripten und Workflows, die darauf abzielen, den administrativen Alltag in der Hausarztpraxis durch den Einsatz künstlicher Intelligenz zu entlasten – ohne dabei sensible Patientendaten in die Cloud zu schicken. Die hier vorgestellten Lösungen sollen lediglich als Inspiration und Ausgangspunkt für eigene Entwicklungen dienen und ersetzen keine professionelle Software oder Beratung. Ziel ist es primär, den großen Herstellern und PVS-Anbietern zu zeigen, dass es auch anders geht und eine datenschutzkonforme, lokale KI-Nutzung möglich ist. Es ist kein fertiges Produkt, sondern ein Werkzeugkasten für Ärzte, die bereit sind, sich mit der Technologie auseinanderzusetzen und sie an ihre Bedürfnisse anzupassen.
 
 ---
 
-## Überblick
-
-In der täglichen Praxis stehen Mediziner vor einer wachsenden Flut an Dokumentationspflichten, Arztbriefen und bürokratischen Prozessen. Herkömmliche KI-Lösungen scheitern oft an der **ärztlichen Schweigepflicht** und den strengen Vorgaben der **DSGVO**, da sie Daten auf externen Servern verarbeiten.
-
-**Askl-AI-on** löst dieses Problem durch:
-
-* **Strikte Lokalität:** Alle Anwendungen laufen auf eigener Hardware in der Praxis.
-* **Open-Source:** Volle Transparenz über den verwendeten Code und die Datenverarbeitung.
-* **Kostenfreiheit:** Nutzung bewährter Open-Source-Tools statt teurer Abo-Modelle.
-* **Modularität:** Eine Sammlung aus Empfehlungen, Drittprogrammen und maßgeschneiderten Skripten.
-
-
-**Wichtig: Askl-AI-on versteht sich nicht als endgültige Lösung sondern dient nur als Beispiel und Informationsquelle dafür, dass quasi alle aktuell cloud-basierten KI-Lösungen auch wunderbar lokal laufen können, um den Schutz der Patientendaten zu verbessern. Es handelt sich um reine Anleitungen, wie Probleme theoretisch lösbar wären, die finale Implementierung obliegt natürlich den PVS-Herstellern und kommerziellen Anbietern.**
+## 🎯 Zielgruppe & Fokus
+Dieses Repository richtet sich an **technisch versierte Ärzte und Ärztinnen**, die:
+1.  Den administrativen Aufwand ihrer Praxis durch KI reduzieren wollen.
+2.  Absolute Kontrolle über ihre Daten behalten möchten (**Local-First**).
+3.  Bereit sind, einfache technische Konfigurationen (Docker, Python-Skripte) selbst durchzuführen.
 
 ---
 
-## Hauptkomponenten & Module
+## 🚨 Haftungsausschluss & Rechtliches
 
-Das Repository ist in verschiedene Unterordner unterteilt, die jeweils spezifische Lösungen enthalten:
+> **WICHTIGER HINWEIS:**
+> Die hier bereitgestellten Werkzeuge und Skripte sind **keine zertifizierten Medizinprodukte**. Sie dienen ausschließlich als assistierende Werkzeuge zur Entlastung bei administrativen Tätigkeiten.
+> - **Verantwortung:** Die medizinische Entscheidungsgewalt und Verantwortung liegt **ausschließlich** beim behandelnden Arzt/bei der behandelnden Ärztin.
+> - **Überprüfungspflicht:** Alle KI-generierten Texte (Arztbriefe, Transkripte) **müssen** vor der Übernahme in die Patientenakte sorgfältig auf Richtigkeit und Vollständigkeit geprüft werden.
+> - **Datenschutz:** Der Anwender ist selbst für die Einhaltung der DSGVO und der ärztlichen Schweigepflicht verantwortlich. Stellen Sie sicher, dass Ihre lokale Hardware sicher konfiguriert ist.
 
-| Modul | Beschreibung | Technologie |
-| --- | --- | --- |
-| **Ambientscribe** | Automatische Transkription und Zusammenfassung von Patientengesprächen. | Ollama, Docker, Whisper, OpenWebUI |
-| **Automatisierung** | Automatisierung von Routineaufgaben (z. B. Fax-Umbenennung, Brief-Zusammenfassung). | n8n, Docker |
-| **Prompts** | Optimierte System-Prompts für medizinische Kontexte. | Markdown |
-
----
-
-## Voraussetzungen
-
-Um die hier angebotenen Lösungen zu nutzen, benötigen Sie in der Regel:
-
-1. **Hardware:** Einen dedizierten Rechner (Server oder leistungsstarker PC) mit einer NVIDIA-Grafikkarte (empfohlen für lokale LLMs), ein Konferenz-Mikrophon (für die Ambient scribe Funktionalität)
-2. **Infrastruktur:** Ein stabiles lokales Netzwerk in der Praxis.
-
-*Detaillierte Hardware-Empfehlungen finden Sie in den jeweiligen Modul-Ordnern.*
+Bitte beachten Sie unsere detaillierte [Sicherheitsrichtlinie](SECURITY.md).
 
 ---
 
-## ⚙️ Installation & Nutzung
+## 🔒 Datenschutz-Philosophie
 
-Jedes Modul verfügt über eine eigene Dokumentation. Grundsätzlich folgt der Prozess diesem Muster:
-
-1. **Unterordner wählen:** Navigieren Sie in das gewünschte Modul (z. B. `/ambientscribe`).
-2. **Anleitung folgen:** Nutzen Sie die dort hinterlegte `README.md` für die spezifische Konfiguration.
+- **100% Lokal:** Keine Daten verlassen Ihre Praxis. Sprachverarbeitung und Textgenerierung finden ausschließlich auf Ihrer eigenen Hardware statt.
+- **Transparenz:** Da der Quellcode offen liegt, können Sie jederzeit nachvollziehen, was mit den Daten passiert.
+- **Keine Hintertüren:** Wir nutzen etablierte Open-Source-Modelle (wie Llama, Whisper via Ollama), die so konfiguriert sind, dass sie keine Daten nach Hause telefonieren.
 
 ---
 
-## ⚖️ Lizenz & Haftungsausschluss
+## 📂 Struktur & Module
 
-### MIT Lizenz
+Das Repository ist modular aufgebaut, um verschiedene Anwendungsfälle abzudecken:
 
-Dieses Projekt ist unter der **MIT-Lizenz** veröffentlicht. Das bedeutet:
+### 1. **Ambient Scribe (Hauptanwendung)**
+*Ordner: [`ambient_scribe`](ambient_scribe/)*
+Das Herzstück für den täglichen Einsatz.
+- **Funktion:** Automatische Transkription und Zusammenfassung von Patientengesprächen in Echtzeit.
+- **Technologie:** Python, Ollama, Whisper (lokal).
+- **Setup:** Siehe separate [Dokumentation](ambient_scribe/README.md).
 
-* Sie dürfen die Inhalte für private und kommerzielle Zwecke nutzen, kopieren und verändern.
-* Der Quellcode muss offenbleiben oder auf die ursprüngliche Quelle verweisen.
-* Die Lizenz von Drittsoftware entspricht der Lizenz des jeweiligen Anbieters.
+### 2. **Automatisierungen**
+*Ordner: [`automatisierungen`](automatisierungen/)*
+Skripte für Routineaufgaben im Hintergrund.
+- **Beispiele:** Intelligente Umbenennung von gescannten Dokumenten, PDFs sortieren, Fax-Eingang verarbeiten.
+- **Technologie:** n8n, Python-Skripte.
 
-### Wichtiger Hinweis zur Verantwortlichkeit
+### 3. **Prompt Engineering**
+*Ordner: [`prompt_engineering`](prompt_engineering/)*
+Spezialisiertes Wissen, um KI-Modelle für medizinische Aufgaben zu instruieren.
+- **Inhalt:** System-Prompts für Arztbriefe, Anamnese, Befunde.
 
-> **Achtung:** Die Nutzung der hier bereitgestellten Werkzeuge erfolgt auf eigene Verantwortung. Der Betreiber dieses Repositories übernimmt keine Haftung für Fehlbehandlungen, Datenverlust oder Verstöße gegen die DSGVO, die durch unsachgemäße Konfiguration oder Fehlinterpretationen der KI-Ergebnisse entstehen könnten. KI-generierte medizinische Zusammenfassungen müssen **immer** durch qualifiziertes medizinisches Personal überprüft werden.
+### 4. **RAG-Wissen**
+*Ordner: [`wissensdatenbank_rag`](wissensdatenbank_rag/)*
+Dateien, um Ihre lokale KI mit spezifischem Fachwissen (Leitlinien, Praxis-Standards) anzureichern (Retrieval-Augmented Generation).
+
+---
+
+## 🚀 Erste Schritte
+
+Um die Lösungen nutzen zu können, benötigen Sie eine solide Basis-Infrastruktur:
+
+1.  **Hardware:**
+    - Ein dedizierter PC/Server in der Praxis (Empfehlung: NVIDIA GPU mit mind. 12GB VRAM für flüssige lokale LLMs).
+    - Ein gutes Konferenzmikrofon für die Ambient-Funktion.
+2.  **Software-Basis:**
+    - Befolgen Sie unseren [Installations-Guide](ambient_scribe/basisinstallation/README.md) zur Einrichtung von Docker & Ollama.
+3.  **Starten:**
+    - Navigieren Sie in den Ordner [`ambient_scribe`](ambient_scribe/) und starten Sie mit dem Skript im Ordner `komplettscript`.
 
 ---
 
 ## 🤝 Mitwirken
 
-Beiträge aus der Community sind herzlich willkommen! Ob Bug-Fixes, neue Workflows oder verbesserte Prompts – öffnen Sie gerne einen *Pull Request* oder erstellen Sie ein *Issue*.
+Beiträge sind herzlich willkommen! Ob Bug-Report oder neuer Workflow – beteiligen Sie sich an der Sicherheit und Effizienz Ihrer Kollegen.
+Siehe [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📄 Lizenz
+
+Dieses Projekt ist unter der [MIT Lizenz](LICENSE) veröffentlicht. Sie dürfen es frei verwenden, modifizieren und weitergeben – auch kommerziell.
