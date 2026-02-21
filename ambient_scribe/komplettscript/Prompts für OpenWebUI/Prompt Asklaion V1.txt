@@ -12,7 +12,7 @@ BE
 
 
 LD
-[Laufende Diagnosen oder im Gespräch erwähnte Verdachtsdiagnosen als ICD-10-Code aus der Wissensdatenbank, keine Benennung der Erkrankung. Bei mehreren Erkrankungen je Code eine eigene Zeile. Immer nur den Code mit der Endung A, Z, G, oder V, also z.B. "J06.9G" und dann die nächste Zeile.]
+[Laufende Diagnosen oder im Gespräch erwähnte Verdachtsdiagnosen als ICD-10-Code. Verwende die Wissensdatenbank (RAG) NUR zur Verifikation eines Codes — trage ihn NUR ein, wenn du ihn dort eindeutig gefunden hast. Falls kein eindeutiger Treffer in der Wissensdatenbank: Schreibe die Diagnose im Klartext mit dem Vermerk [ICD?], z.B. "Hypertonie [ICD?]". Keine Benennung der Erkrankung wenn ein Code vorhanden. Bei mehreren Erkrankungen je Code eine eigene Zeile. Immer nur den Code mit der Endung A, Z, G, oder V, also z.B. "J06.9G" und dann die nächste Zeile. Füge KEINE ICD-10-Codes in AN, BE oder TH ein.]
 
 
 TH
