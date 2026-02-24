@@ -517,15 +517,42 @@ class ModernRecorder:
     def open_settings(self):
         win = tk.Toplevel(self.root)
         win.title("Einstellungen")
-        win.geometry("500x650") 
+        win.geometry("520x650") 
         win.transient(self.root)
         win.grab_set()
 
+        # Sticky Save Button at the TOP
+        top_frame = tk.Frame(win, bg="#ecf0f1")
+        top_frame.pack(side="top", fill="x")
+        btn_top_save = tk.Button(top_frame, text="💾 Änderungen Speichern", bg="#2ecc71", fg="white", font=("Segoe UI", 9, "bold"), pady=5)
+        btn_top_save.pack(side="right", padx=10, pady=5)
+        tk.Label(top_frame, text="Einstellungen", font=("Segoe UI", 12, "bold"), bg="#ecf0f1").pack(side="left", padx=10)
+
+        # Scrollbar and Canvas
+        canvas = tk.Canvas(win, borderwidth=0, highlightthickness=0)
+        scroll = tk.Scrollbar(win, orient="vertical", command=canvas.yview)
+        scroll.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        canvas.configure(yscrollcommand=scroll.set)
+
+        content = tk.Frame(canvas)
+        content_window = canvas.create_window((0, 0), window=content, anchor="nw")
+        
+        def configure_canvas(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+            canvas.itemconfig(content_window, width=canvas.winfo_width())
+        content.bind("<Configure>", configure_canvas)
+        canvas.bind("<Configure>", lambda e: canvas.itemconfig(content_window, width=e.width))
+
+        def on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        win.bind_all("<MouseWheel>", on_mousewheel)
+
         def add_entry(name, key):
-            tk.Label(win, text=name, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
-            e = tk.Entry(win, width=50)
+            tk.Label(content, text=name, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+            e = tk.Entry(content, width=50)
             e.insert(0, config.get(key, ""))
-            e.pack(padx=10)
+            e.pack(padx=10, fill="x")
             return e
 
         e_server = add_entry("Whisper Server URL", "server_url")
@@ -543,24 +570,24 @@ class ModernRecorder:
         input_devs = [f"{i}: {d['name']}" for i, d in enumerate(devices) if d['max_input_channels'] > 0]
         wasapi_devs = [f"{i}: {d['name']}" for i, d in enumerate(devices) if d['hostapi'] == sd.default.hostapi]
 
-        tk.Label(win, text="Mikrofon", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
-        cb_mic = ttk.Combobox(win, values=input_devs, width=50)
+        tk.Label(content, text="Mikrofon", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+        cb_mic = ttk.Combobox(content, values=input_devs)
         if config["input_device"] is not None:
              match = [d for d in input_devs if d.startswith(str(config["input_device"]) + ":")]
              if match: cb_mic.set(match[0])
         else:
             cb_mic.set(input_devs[0] if input_devs else "")
-        cb_mic.pack(padx=10)
+        cb_mic.pack(padx=10, fill="x")
 
-        tk.Label(win, text="System-Audio (Loopback) - Optional für Video-Calls", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
-        cb_loop = ttk.Combobox(win, values=wasapi_devs, width=50)
+        tk.Label(content, text="System-Audio (Loopback) - Optional für Video-Calls", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+        cb_loop = ttk.Combobox(content, values=wasapi_devs)
         if config["loopback_device"] is not None:
              match = [d for d in wasapi_devs if d.startswith(str(config["loopback_device"]) + ":")]
              if match: cb_loop.set(match[0])
-        cb_loop.pack(padx=10)
+        cb_loop.pack(padx=10, fill="x")
         
         var_mix = tk.BooleanVar(value=config.get("mix_system_audio", False))
-        tk.Checkbutton(win, text="System-Audio Aufnehmen (Mix)", variable=var_mix).pack(anchor="w", padx=10, pady=5)
+        tk.Checkbutton(content, text="System-Audio Aufnehmen (Mix)", variable=var_mix).pack(anchor="w", padx=10, pady=10)
 
         def save():
             config["server_url"] = e_server.get()
@@ -583,10 +610,14 @@ class ModernRecorder:
             config["mix_system_audio"] = var_mix.get()
             
             save_config(config)
+            
+            # Unbind wheel to prevent errors after window destroy
+            win.unbind_all("<MouseWheel>")
             win.destroy()
             self.log("Einstellungen gespeichert.")
 
-        tk.Button(win, text="Speichern", command=save, bg="#2ecc71", fg="white", pady=5).pack(fill="x", padx=20, pady=20)
+        btn_top_save.config(command=save)
+        tk.Button(content, text="Speichern", command=save, bg="#2ecc71", fg="white", pady=5).pack(fill="x", padx=20, pady=20)
 
     # --- LOGIC ---
     def audio_data_callback(self, data):
@@ -682,28 +713,37 @@ class ModernRecorder:
 
     def stop_recording(self):
         self.is_recording = False
-        data = self.recorder.stop()
-        
-        # UI Updates
+
+        # UI Updates sofort auf dem Main-Thread (leichtgewichtig)
         for b in [self.amb_start, self.dik_start, self.arena_start]: b.config(state="normal", bg="#2ecc71")
         for b in [self.amb_pause, self.dik_pause, self.amb_stop, self.dik_stop, self.arena_pause, self.arena_stop]: b.config(state="disabled")
         for b in self.finding_buttons: b.config(state="disabled")
         self.status_label.config(text="FINALISIERE...", fg="#3498db")
         self.status_dot.config(fg="#3498db")
 
-        # Manuelle Notiz
+        # Manuelle Notiz (braucht Main-Thread für tk.Text-Zugriff)
+        note = ""
         if self.notebook.index(self.notebook.select()) == 0:
             note = self.note_ambient.get("1.0", tk.END).strip()
             if note:
-                self.chunk_counter += 1
-                self.transcription_parts[self.chunk_counter] = f" [NOTIZ: {note}] "
                 self.note_ambient.delete("1.0", tk.END)
 
-        if data is not None and len(data) > 0:
-            self.chunk_counter += 1
-            self.upload_queue.put((self.chunk_counter, data, True))
-        else:
-            self.finalize_transcription()
+        # Schwere Arbeit (recorder.stop = np.concatenate großer Buffer)
+        # in Hintergrund-Thread verschieben, damit GUI nicht einfriert
+        def _stop_worker():
+            data = self.recorder.stop()
+
+            if note:
+                self.chunk_counter += 1
+                self.transcription_parts[self.chunk_counter] = f" [NOTIZ: {note}] "
+
+            if data is not None and len(data) > 0:
+                self.chunk_counter += 1
+                self.upload_queue.put((self.chunk_counter, data, True))
+            else:
+                self.root.after(0, self.finalize_transcription)
+
+        threading.Thread(target=_stop_worker, daemon=True).start()
 
     def toggle_pause(self):
         self.recorder.paused = not self.recorder.paused
