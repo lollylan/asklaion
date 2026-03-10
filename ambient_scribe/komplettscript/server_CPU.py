@@ -1,8 +1,12 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import uvicorn
 from fastapi import FastAPI, UploadFile, File
 from faster_whisper import WhisperModel
 import shutil
-import os
+from security_utils import ensure_tls_certs
 
 app = FastAPI()
 
@@ -33,4 +37,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     return {"text": transcription}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    cert_file, key_file, ca_cert_file, ip = ensure_tls_certs()
+    print(f"\n✅ Server läuft auf: https://{ip}:8000")
+    print(f"📋 CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
+    uvicorn.run(app, host="0.0.0.0", port=8000, ssl_certfile=cert_file, ssl_keyfile=key_file)

@@ -8,3 +8,9 @@ Vorversionen/
 Ambient scribe/Komplettscript/Vorversionen/
 
 ambient_scribe/komplettscript/Komplettscript_Full_Backup.py
+
+# Private Schlüssel & Zertifikate (werden lokal generiert)
+certs/
+
+# Claude Code
+.claude/

@@ -1,10 +1,13 @@
 import os
 import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import shutil
 import importlib.util
 import uvicorn
 import uuid  # Für eindeutige Dateinamen bei parallelen Anfragen
 from fastapi import FastAPI, UploadFile, File
+from security_utils import ensure_tls_certs
 
 # --- DLL & PATH FIX (Speziell für Windows/NVIDIA Umgebungen) ---
 if os.name == 'nt':
@@ -85,5 +88,8 @@ async def transcribe_audio(file: UploadFile = File(...)):
                 print(f"Could not delete temp file {temp_filename}: {e}")
 
 if __name__ == "__main__":
+    cert_file, key_file, ca_cert_file, ip = ensure_tls_certs()
+    print(f"\n✅ Server läuft auf: https://{ip}:8000")
+    print(f"📋 CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
     # Startet den Server auf allen Netzwerkschnittstellen (wichtig für Zugriff aus Zimmern)
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, ssl_certfile=cert_file, ssl_keyfile=key_file)

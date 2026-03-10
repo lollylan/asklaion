@@ -1,4 +1,9 @@
 import sys
+import os
+# Sicherstellen, dass der Ordner des Scripts im Python-Pfad liegt
+# (damit security_utils.py gefunden wird, egal von wo gestartet)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext, simpledialog, filedialog
 import sounddevice as sd
@@ -10,9 +15,9 @@ import io
 import time
 import pyperclip
 from datetime import datetime
-import os
 import json
 import queue
+from security_utils import encrypt_value, decrypt_value, is_encrypted, open_ca_for_system_install
 
 # PDF-Textextraktion
 try:
@@ -32,9 +37,10 @@ except ImportError:
 # --- CONFIGURATION MANAGEMENT ---
 CONFIG_FILE = "config.json"
 DEFAULT_CONFIG = {
-    "server_url": "http://192.168.10.44:8000/transcribe",
-    "openwebui_url": "http://192.168.10.44:3000/api/chat/completions",
+    "server_url": "https://192.168.10.51:8000/transcribe",
+    "openwebui_url": "http://192.168.10.51:3000/api/chat/completions",
     "api_key": "API-Key von OpenwebUI hier eintragen",
+    "ca_cert_path": "",
     "model_ambient": "asklaion-v1",
     "model_diktat": "diktiersklavev1",
     "model_arena_a": "asklaion-v1",
@@ -50,7 +56,7 @@ DEFAULT_CONFIG = {
 def load_config():
     if not os.path.exists(CONFIG_FILE):
         save_config(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG
+        return DEFAULT_CONFIG.copy()
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             loaded = json.load(f)
@@ -58,13 +64,28 @@ def load_config():
             for key, value in DEFAULT_CONFIG.items():
                 if key not in loaded:
                     loaded[key] = value
+            # API-Key im Arbeitsspeicher immer im Klartext halten
+            if is_encrypted(loaded.get("api_key", "")):
+                loaded["api_key"] = decrypt_value(loaded["api_key"])
             return loaded
     except:
-        return DEFAULT_CONFIG
+        return DEFAULT_CONFIG.copy()
 
-def save_config(config):
+def save_config(cfg):
+    to_save = cfg.copy()
+    # API-Key vor dem Schreiben verschlüsseln (nur wenn ein Wert vorhanden)
+    raw_key = to_save.get("api_key", "")
+    if raw_key and not is_encrypted(raw_key):
+        to_save["api_key"] = encrypt_value(raw_key)
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4)
+        json.dump(to_save, f, indent=4)
+
+def _tls_verify():
+    """Gibt den Pfad zum CA-Zertifikat zurück, oder True (System-CA-Store)."""
+    ca = config.get("ca_cert_path", "")
+    if ca and os.path.exists(ca):
+        return ca
+    return True
 
 # --- GLOBAL STATE ---
 config = load_config()
@@ -361,8 +382,7 @@ class ModernRecorder:
         # Drag-and-Drop aktivieren (wenn windnd verfügbar)
         if HAS_WINDND:
             try:
-                windnd.hook_dropfiles(self.drop_frame, func=self._on_drop_files)
-                windnd.hook_dropfiles(self.drop_label, func=self._on_drop_files)
+                windnd.hook_dropfiles(self.root, func=self._on_drop_files, force_unicode=True)
             except Exception as e:
                 print(f"Drag-and-Drop Fehler: {e}")
 
@@ -379,14 +399,15 @@ class ModernRecorder:
         """Callback für Drag-and-Drop (windnd)"""
         if not file_list:
             return
-        # windnd gibt eine Liste von bytes-Pfaden zurück
+        
         filepath = file_list[0]
         if isinstance(filepath, bytes):
             try:
                 filepath = filepath.decode("utf-8")
             except UnicodeDecodeError:
-                filepath = filepath.decode("cp1252")
-        filepath = filepath.strip()
+                filepath = filepath.decode("cp1252", errors="replace")
+        
+        filepath = str(filepath).strip('\x00').strip()
         if filepath.lower().endswith(".pdf"):
             # Zum Arztbrief-Tab wechseln
             self.notebook.select(self.tab_arztbrief)
@@ -449,7 +470,7 @@ class ModernRecorder:
         }
         try:
             self.log(f"Sende an LLM ({model})...")
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=180)
+            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=180, verify=_tls_verify())
             if r.status_code == 200:
                 result = r.json()['choices'][0]['message']['content']
                 self.log(f"Arztbrief-Zusammenfassung erhalten ({len(result)} Zeichen)")
@@ -557,7 +578,30 @@ class ModernRecorder:
 
         e_server = add_entry("Whisper Server URL", "server_url")
         e_webui = add_entry("OpenWebUI URL", "openwebui_url")
-        e_key = add_entry("API Key", "api_key")
+        e_key = add_entry("API Key (wird verschlüsselt gespeichert)", "api_key")
+
+        # CA-Zertifikat-Auswahl
+        tk.Label(content, text="CA-Zertifikat (ca.crt vom Server)", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+        ca_frame = tk.Frame(content)
+        ca_frame.pack(padx=10, fill="x")
+        e_ca = tk.Entry(ca_frame, width=38)
+        e_ca.insert(0, config.get("ca_cert_path", ""))
+        e_ca.pack(side="left", fill="x", expand=True)
+        def browse_ca():
+            path = filedialog.askopenfilename(title="CA-Zertifikat auswählen", filetypes=[("Zertifikat", "*.crt *.pem"), ("Alle Dateien", "*.*")])
+            if path:
+                e_ca.delete(0, tk.END)
+                e_ca.insert(0, path)
+        tk.Button(ca_frame, text="📂", command=browse_ca, relief="flat", bg="#ecf0f1").pack(side="left", padx=4)
+        def install_ca_browser():
+            path = e_ca.get().strip()
+            if not path or not os.path.exists(path):
+                messagebox.showerror("Fehler", "Bitte zuerst eine gültige ca.crt Datei auswählen.")
+                return
+            open_ca_for_system_install(path)
+            messagebox.showinfo("Hinweis", "Windows-Zertifikat-Assistent geöffnet.\nBitte 'Lokaler Computer' → 'Vertrauenswürdige Stammzertifizierungsstellen' wählen.")
+        tk.Button(content, text="🌐 Im Browser/System vertrauen (einmalig)", command=install_ca_browser,
+                  bg="#3498db", fg="white", font=("Segoe UI", 8), relief="flat").pack(anchor="w", padx=10, pady=(2,0))
         e_model_amb = add_entry("Ambient Modell ID", "model_ambient")
         e_model_dik = add_entry("Diktat Modell ID", "model_diktat")
         e_model_arena_a = add_entry("Arena Modell A", "model_arena_a")
@@ -593,6 +637,7 @@ class ModernRecorder:
             config["server_url"] = e_server.get()
             config["openwebui_url"] = e_webui.get()
             config["api_key"] = e_key.get()
+            config["ca_cert_path"] = e_ca.get().strip()
             config["model_ambient"] = e_model_amb.get()
             config["model_diktat"] = e_model_dik.get()
             config["model_arena_a"] = e_model_arena_a.get()
@@ -657,7 +702,7 @@ class ModernRecorder:
         
         try:
             files = {'file': ('chunk.wav', wav_io, 'audio/wav')}
-            response = requests.post(config["server_url"], files=files, timeout=30)
+            response = requests.post(config["server_url"], files=files, timeout=30, verify=_tls_verify())
             if response.status_code == 200:
                 text = response.json().get("text", "")
                 if text:
@@ -789,7 +834,7 @@ class ModernRecorder:
             "messages": [{"role": "user", "content": text}]
         }
         try:
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120)
+            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
             if r.status_code == 200:
                 res = r.json()['choices'][0]['message']['content']
                 self.root.after(0, lambda: self._show_result(res))
@@ -807,7 +852,7 @@ class ModernRecorder:
         }
         result = None
         try:
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120)
+            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
             if r.status_code == 200:
                 result = r.json()['choices'][0]['message']['content']
                 self.log(f"Arena Modell {label} ({model}) fertig.")
