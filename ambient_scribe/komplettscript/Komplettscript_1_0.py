@@ -17,7 +17,9 @@ import pyperclip
 from datetime import datetime
 import json
 import queue
-from security_utils import encrypt_value, decrypt_value, is_encrypted, open_ca_for_system_install
+from security_utils import encrypt_value, decrypt_value, is_encrypted, open_ca_for_system_install, get_base_dir
+
+_BASE = get_base_dir()
 
 # PDF-Textextraktion
 try:
@@ -35,7 +37,7 @@ except ImportError:
     HAS_WINDND = False
 
 # --- CONFIGURATION MANAGEMENT ---
-CONFIG_FILE = "config.json"
+CONFIG_FILE = os.path.join(_BASE, "config.json")
 DEFAULT_CONFIG = {
     "server_url": "https://192.168.10.51:8000/transcribe",
     "openwebui_url": "http://192.168.10.51:3000/api/chat/completions",
@@ -517,7 +519,7 @@ class ModernRecorder:
         days = config.get("auto_delete_days", 1)
         if not isinstance(days, int) or days <= 0:
             return
-        folder = "Transkripte_Raw"
+        folder = os.path.join(_BASE, "Transkripte_Raw")
         if not os.path.exists(folder):
             return
         cutoff = time.time() - (days * 86400)
@@ -809,8 +811,9 @@ class ModernRecorder:
         sorted_keys = sorted(self.transcription_parts.keys())
         raw_text = " ".join([self.transcription_parts[k] for k in sorted_keys])
         
-        if not os.path.exists("Transkripte_Raw"): os.makedirs("Transkripte_Raw")
-        with open(f"Transkripte_Raw/raw_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", "w", encoding="utf-8") as f:
+        _raw_dir = os.path.join(_BASE, "Transkripte_Raw")
+        if not os.path.exists(_raw_dir): os.makedirs(_raw_dir)
+        with open(os.path.join(_raw_dir, f"raw_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"), "w", encoding="utf-8") as f:
             f.write(raw_text)
 
         current_tab_idx = self.notebook.index(self.notebook.select())

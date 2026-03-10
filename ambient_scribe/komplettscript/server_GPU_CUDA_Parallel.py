@@ -10,10 +10,10 @@ from fastapi import FastAPI, UploadFile, File
 from security_utils import ensure_tls_certs
 
 # --- DLL & PATH FIX (Speziell für Windows/NVIDIA Umgebungen) ---
-if os.name == 'nt':
+if os.name == 'nt' and not getattr(sys, 'frozen', False):
     print("--- Diagnostic: Searching for NVIDIA DLLs ---")
     nvidia_packages = ['nvidia.cublas', 'nvidia.cudnn']
-    
+
     for pkg in nvidia_packages:
         spec = importlib.util.find_spec(pkg)
         if spec and spec.submodule_search_locations:

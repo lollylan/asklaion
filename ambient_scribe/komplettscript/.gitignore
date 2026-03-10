@@ -1,0 +1,27 @@
+# PyInstaller Build-Artefakte
+build/
+dist/
+*.spec
+
+# Komplettscript_Full_Backup EXE (nicht als Release hochladen)
+Komplettscript_Full_Backup.exe
+dist/Komplettscript_Full_Backup/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# TLS Zertifikate (maschinenspezifisch)
+certs/
+
+# Konfiguration (maschinenspezifisch, enthaelt verschluesselten API-Key)
+config.json
+
+# Claude Code
+.claude/
+
+# Temporaere Dateien
+temp_*.wav
+temp_*.mp3
+Transkripte_Raw/

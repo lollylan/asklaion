@@ -6,6 +6,7 @@ Benötigt: pip install cryptography
 """
 
 import os
+import sys
 import socket
 import hashlib
 import base64
@@ -13,7 +14,13 @@ import datetime
 import subprocess
 from pathlib import Path
 
-CERT_DIR = Path(__file__).parent / "certs"
+def get_base_dir() -> str:
+    """Gibt das Basisverzeichnis zurück – funktioniert als .py und als .exe (PyInstaller)."""
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+CERT_DIR = Path(get_base_dir()) / "certs"
 CA_KEY_FILE   = CERT_DIR / "ca.key"
 CA_CERT_FILE  = CERT_DIR / "ca.crt"
 SRV_KEY_FILE  = CERT_DIR / "server.key"
