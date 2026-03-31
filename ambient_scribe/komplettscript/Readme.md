@@ -9,8 +9,8 @@ Dieses Modul bietet eine "One-Click"-Lösung für die medizinische Dokumentation
 1. **Audioaufnahme:** Der Client nimmt das Gespräch am Behandlungsplatz auf.
 2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPU statt, um in der GPU mehr Platz für ein größeres LLM zu haben. Das Script nutzt Whisper Medium.
 3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweist, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss separat installiert werden) nutzt. Dieses nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen. Wenn mehrere Behandler gleichzeitig die KI-Transkription nutzen wollen, bitte das Script `server_GPU_Cuda_Parallel.py` nutzen, damit die Diktate nicht "vermischt" werden.
-4. **LLM-Verarbeitung:** Der Text wird an **OpenWebUI** gesendet, wo ein spezialisiertes Modell die medizinische Zusammenfassung erstellt oder das Diktat verbessert.
-5. **PVS-kompatible Ausgabe:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in gängigen PVS (z.B. PegaMed, Tomedo, Medistar) mit `Strg + V` korrekt eingefügt werden können. Der mitgelieferte `asklaion-v1` System-Prompt ist so gestaltet, dass das Ausgabeformat sich leicht in **PegaMed** einfügen lässt. Andere PVS-Systeme sind selbstverständlich ebenfalls nutzbar — der System-Prompt muss lediglich an das gewünschte Ausgabeformat angepasst werden.
+4. **LLM-Verarbeitung:** Der Text wird direkt an **Ollama** gesendet, wo ein lokales Sprachmodell die medizinische Zusammenfassung erstellt oder das Diktat verbessert.
+5. **PVS-kompatible Ausgabe:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in gängigen PVS (z.B. PegaMed, Tomedo, Medistar) mit `Strg + V` korrekt eingefügt werden können. Der Standard-System-Prompt ist für **PegaMed** optimiert und direkt in der App hinterlegt. Andere PVS-Systeme sind selbstverständlich ebenfalls nutzbar — der System-Prompt kann in den Einstellungen an das gewünschte Ausgabeformat angepasst werden.
 
 ---
 
@@ -18,16 +18,16 @@ Dieses Modul bietet eine "One-Click"-Lösung für die medizinische Dokumentation
 
 Das Programm bietet sechs Tabs:
 
-| Tab | Funktion | OpenWebUI-Modell |
+| Tab | Funktion | Standard-Modell |
 |---|---|---|
-| **Gespräch** | Ambient-Scribe: Arzt-Patienten-Gespräch aufnehmen und zusammenfassen | `asklaion-v1` |
-| **Diktat** | Diktiertes Transkript durch LLM stilistisch überarbeiten | `diktiersklavev1` |
-| **Arena** | Zwei LLM-Modelle gleichzeitig vergleichen | `asklaion-v1` / `diktiersklavev1` |
-| **Arztbrief** | PDF-Arztbriefe hochladen und zusammenfassen lassen | `arztbriefzusammenfasser` |
+| **Gespräch** | Ambient-Scribe: Arzt-Patienten-Gespräch aufnehmen und zusammenfassen | `llama3.1:8b` |
+| **Diktat** | Diktiertes Transkript durch LLM stilistisch überarbeiten | `llama3.1:8b` |
+| **Arena** | Zwei LLM-Modelle gleichzeitig vergleichen | `llama3.1:8b` / `qwen2.5:14b` |
+| **Arztbrief** | PDF-Arztbriefe hochladen und zusammenfassen lassen | `llama3.1:8b` |
 
 ### 🆕 Neue Funktionen (v1.0)
 
-- **PVS-agnostisches Design:** Nicht mehr an PegaMed gebunden — das Ausgabeformat lässt sich durch Anpassung des System-Prompts in OpenWebUI an jedes PVS anpassen.
+- **PVS-agnostisches Design:** Nicht mehr an PegaMed gebunden — das Ausgabeformat lässt sich durch Anpassung des System-Prompts in den Einstellungen an jedes PVS anpassen.
 - **Automatische Transkript-Löschung (Datenschutz):** Transkripte im Ordner `Transkripte_Raw/` werden beim Programmstart automatisch gelöscht, wenn sie älter als die konfigurierte Anzahl Tage sind (Standard: 1 Tag, konfigurierbar über Einstellungen, 0 = deaktiviert).
 
 ---
@@ -58,7 +58,7 @@ pip install sounddevice numpy requests scipy pyperclip PyPDF2 windnd
 |---|---|
 | `sounddevice` | Audioaufnahme |
 | `numpy` | Audio-Datenverarbeitung |
-| `requests` | HTTP-Kommunikation mit Server & OpenWebUI |
+| `requests` | HTTP-Kommunikation mit Server & Ollama |
 | `scipy` | WAV-Export |
 | `pyperclip` | Kopieren in Zwischenablage |
 | `PyPDF2` | PDF-Textextraktion (Arztbrief) |
@@ -76,24 +76,28 @@ Die Konfiguration erfolgt über die integrierte **Einstellungs-Oberfläche** (�
 
 | Schlüssel | Beschreibung | Standard |
 |---|---|---|
-| `server_url` | URL des Whisper-Transkriptionsservers | `http://192.168.10.44:8000/transcribe` |
-| `openwebui_url` | URL der OpenWebUI API | `http://192.168.10.44:3000/api/chat/completions` |
-| `api_key` | API-Key aus OpenWebUI | — |
-| `model_ambient` | Modell für Gesprächszusammenfassung | `asklaion-v1` |
-| `model_diktat` | Modell für Diktat-Überarbeitung | `diktiersklavev1` |
-| `model_arena_a` / `model_arena_b` | Arena-Vergleichsmodelle | `asklaion-v1` / `diktiersklavev1` |
-| `model_arztbrief` | Modell für Arztbriefzusammenfassung | `arztbriefzusammenfasser` |
+| `server_url` | URL des Whisper-Transkriptionsservers | `https://192.168.10.51:8000/transcribe` |
+| `llm_api_url` | URL der Ollama-API | `http://localhost:11434/v1/chat/completions` |
+| `api_key` | API-Key (optional, Ollama braucht keinen) | — |
+| `model_ambient` | Modell für Gesprächszusammenfassung | `llama3.1:8b` |
+| `model_diktat` | Modell für Diktat-Überarbeitung | `llama3.1:8b` |
+| `model_arena_a` / `model_arena_b` | Arena-Vergleichsmodelle | `llama3.1:8b` / `qwen2.5:14b` |
+| `model_arztbrief` | Modell für Arztbriefzusammenfassung | `llama3.1:8b` |
 | `auto_delete_days` | Tage nach denen Transkripte gelöscht werden (0 = aus) | `1` |
 | `input_device` | Mikrofon-Eingang (ID oder Name) | Systemstandard |
 | `loopback_device` | System-Audio Eingang | — |
 | `chunk_duration` | Aufnahme-Chunk-Dauer in Sekunden | `30` |
 | `mix_system_audio` | System-Audio mitmischen | `false` |
 
-### OpenWebUI-Vorbereitung
+### Ollama-Vorbereitung
 
-1. **Modelle erstellen:** Erstellen Sie in Ihrer OpenWebUI-Instanz die benötigten Modelle (siehe Tabelle oben).
-2. **System-Prompts:** Hinterlegen Sie Ihren gewünschten System-Prompt direkt in den Einstellungen der jeweiligen Modelle (Beispiele siehe Prompt-Dateien im Repository). Der `asklaion-v1` Prompt ist standardmäßig für PegaMed optimiert. Für andere PVS passen Sie den Prompt an das gewünschte Ausgabeformat an.
-3. **API-Key:** Generieren Sie in Ihrem OpenWebUI-Profil einen API-Key.
+1. **Modelle herunterladen:** Laden Sie die gewünschten Modelle mit `ollama pull` herunter, z.B.:
+   ```bash
+   ollama pull llama3.1:8b
+   ollama pull qwen2.5:14b
+   ```
+2. **System-Prompts:** Die Standard-Prompts (Ambient, Diktat, Arztbrief) sind bereits in der App hinterlegt und können in den Einstellungen angepasst werden. Für andere PVS passen Sie den Prompt an das gewünschte Ausgabeformat an.
+3. **Modellauswahl:** In den Einstellungen der App werden alle verfügbaren Ollama-Modelle automatisch als Dropdown angezeigt.
 
 ### Server-Setup
 
@@ -136,7 +140,7 @@ python server_GPU_CUDA_Parallel.py
 ## 🩺 Spezielle Features für Mediziner
 
 * **PVS-kompatible Formatierung:** Das Skript entfernt automatisch Fettdruck-Sterne (`**`) und Rauten (`##`), die in PVS-Systemen oft kryptisch dargestellt werden. Die Zeilenumbrüche werden Windows-kompatibel (`\r\n`) formatiert.
-* **Flexibles Ausgabeformat:** Der System-Prompt in OpenWebUI bestimmt die Ausgabestruktur. Der mitgelieferte `asklaion-v1` Prompt ist für PegaMed optimiert — für andere PVS einfach den Prompt anpassen.
+* **Flexibles Ausgabeformat:** Der System-Prompt bestimmt die Ausgabestruktur und kann direkt in den Einstellungen bearbeitet werden. Der Standard-Prompt ist für PegaMed optimiert — für andere PVS einfach den Prompt anpassen.
 * **Normbefunde:** Häufige Befunde wie "Herz: rein, regelmäßig" können zeitsparend per Knopfdruck ergänzt werden.
 * **Drag-and-Drop:** PDF-Arztbriefe können direkt auf die Anwendung gezogen werden.
 
