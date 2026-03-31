@@ -173,7 +173,7 @@ def ensure_tls_certs() -> tuple:
         if SRV_IP_FILE.exists():
             old = SRV_IP_FILE.read_text(encoding="utf-8").strip()
             if old != current_ip:
-                print(f"[TLS] IP geändert ({old} → {current_ip}), erneuere Zertifikat...")
+                print(f"[TLS] IP geaendert ({old} -> {current_ip}), erneuere Zertifikat...")
         _generate_server_cert(ca_key, ca_cert, current_ip)
 
     return str(SRV_CERT_FILE), str(SRV_KEY_FILE), str(CA_CERT_FILE), current_ip

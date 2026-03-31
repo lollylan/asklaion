@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import shutil
@@ -46,7 +47,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     # Erzeuge einen absolut eindeutigen Dateinamen pro Anfrage
     # Das verhindert, dass sich Zimmer 1 und Zimmer 2 gegenseitig Dateien überschreiben
     request_id = uuid.uuid4().hex
-    temp_filename = f"temp_{request_id}_{file.filename}"
+    temp_filename = os.path.join(tempfile.gettempdir(), f"temp_{request_id}_{file.filename}")
     
     # Datei vom Client empfangen und zwischenspeichern
     with open(temp_filename, "wb") as buffer:
@@ -89,7 +90,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     cert_file, key_file, ca_cert_file, ip = ensure_tls_certs()
-    print(f"\n✅ Server läuft auf: https://{ip}:8000")
-    print(f"📋 CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
+    print(f"\n[OK] Server laeuft auf: https://{ip}:8000")
+    print(f"[INFO] CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
     # Startet den Server auf allen Netzwerkschnittstellen (wichtig für Zugriff aus Zimmern)
     uvicorn.run(app, host="0.0.0.0", port=8000, ssl_certfile=cert_file, ssl_keyfile=key_file)

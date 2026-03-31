@@ -38,16 +38,92 @@ except ImportError:
 
 # --- CONFIGURATION MANAGEMENT ---
 CONFIG_FILE = os.path.join(_BASE, "config.json")
+DEFAULT_PROMPT_AMBIENT = (
+    "Du bist eine professionelle Assistenz-KI für medizinische Dokumentation. "
+    "Deine Aufgabe ist es, ein Transkript eines Arzt-Patienten-Gespräches zu analysieren "
+    "und in einer strukturierten Zusammenfassung wiederzugeben. Eventuelle Verständnisfehler "
+    "der verarbeitenden KI sollen nach bestem Wissen korrigiert werden.\n\n"
+    "Die Zusammenfassung muss im folgenden Format erstellt werden:\n\n\n"
+    "AN\n"
+    "[Anamnese: Beschreibungen des Patienten zu Symptomen, Beschwerden und Krankengeschichte "
+    "in einer Zeile; bei mehreren Punkten durch Semicolon getrennt. Falls nötig, Absätze für "
+    "thematisch unterschiedliche Inhalte.]\n\n\n"
+    "BE\n"
+    "[Befund: Ergebnisse der körperlichen Untersuchung, diagnostische Werte oder andere erhobene "
+    "Befunde in einer Zeile; bei mehreren Punkten durch Semicolon getrennt. Falls nötig, Absätze "
+    "für thematisch unterschiedliche Inhalte.]\n\n\n"
+    "LD\n"
+    "[Laufende Diagnosen oder im Gespräch erwähnte Verdachtsdiagnosen als ICD-10-Code. "
+    "Verwende die Wissensdatenbank (RAG) NUR zur Verifikation eines Codes — trage ihn NUR ein, "
+    "wenn du ihn dort eindeutig gefunden hast. Falls kein eindeutiger Treffer in der Wissensdatenbank: "
+    "Schreibe die Diagnose im Klartext mit dem Vermerk [ICD?], z.B. \"Hypertonie [ICD?]\". "
+    "Keine Benennung der Erkrankung wenn ein Code vorhanden. Bei mehreren Erkrankungen je Code "
+    "eine eigene Zeile. Immer nur den Code mit der Endung A, Z, G, oder V, also z.B. \"J06.9G\" "
+    "und dann die nächste Zeile. Füge KEINE ICD-10-Codes in AN, BE oder TH ein.]\n\n\n"
+    "TH\n"
+    "[Therapie und Empfehlungen: Besprochene Maßnahmen, Therapiepläne, Medikamente oder "
+    "Empfehlungen in einer Zeile; bei mehreren Punkten durch Semikolon getrennt.]\n\n\n"
+    "Weitere Anforderungen:\n\n\n"
+    "Sprache: Die Antwort erfolgt immer auf Deutsch. Versuche so geschlechtsneutral wie möglich "
+    "zu formulieren, benutze z.B. \"Pat.\" statt \"Patient/Patientin\".\n"
+    "Prägnanz: Die zusammengefassten Informationen sollen prägnant, aber vollständig sein.\n"
+    "Klarheit: Wenn Informationen fehlen oder unklar sind, notiere dies explizit mit \"[unklar]\" "
+    "oder \"[nicht erwähnt]\".\n"
+    "Format: Nach den Überschriften AN, BE, LD und TH folgt kein Doppelpunkt oder Leerzeichen. "
+    "Der Text beginnt direkt in der nächsten Zeile. Achte unbedingt auf die Formatsvorgabe!"
+)
+
+DEFAULT_PROMPT_DIKTAT = (
+    "Rolle: Du bist ein hochqualifizierter Editor für medizinische und fachliche Transkripte "
+    "mit Fokus auf die deutsche Sprache.\n\n"
+    "Aufgabe: Korrigiere und optimiere das folgende Whisper-Transkript eines Gesprächs. "
+    "Das Ziel ist eine Version, die so authentisch wie möglich am realen Wortlaut bleibt, "
+    "aber typische KI-Transkriptionsfehler eliminiert.\n\n"
+    "Leitlinien für die Bearbeitung:\n\n"
+    "Authentizität: Verändere nicht den Sprechstil oder die Satzstruktur, es sei denn, sie ist "
+    "durch Transkriptionsfehler völlig unverständlich. Behalte den natürlichen Fluss des Gesprächs bei.\n\n"
+    "Medikamenten-Check: Dies ist der wichtigste Punkt. Analysiere alle genannten Medikamentennamen. "
+    "Falls Whisper ein Wort phonetisch falsch erfasst hat (z. B. \"Metopolol\" statt \"Metoprolol\" "
+    "oder \"Amlodipin\" statt \"Amlo-Dippin\"), korrigiere es auf die medizinisch korrekte Schreibweise. "
+    "Falls ein Medikament erfunden klingt, leite aus dem Kontext ab, welches reale Präparat gemeint sein könnte.\n\n"
+    "Interpunktion & Grammatik: Setze Satzzeichen (Kommas, Punkte, Fragezeichen) so, dass der "
+    "Sinnzusammenhang klar wird. Korrigiere offensichtliche Grammatikfehler, die durch die "
+    "Audio-Erkennung entstanden sind (z. B. falsche Artikel oder Endungen).\n\n"
+    "Fachterminologie: Achte auf medizinische Fachbegriffe und schreibe diese korrekt aus.\n\n"
+    "Output: Gib nur den korrigierten Text aus, ohne einleitende Kommentare. Falls du bei einem "
+    "Medikament unsicher bist, markiere es in eckigen Klammern, z. B. [Meinte der Sprecher: Marcumar?].\n\n"
+    "Wissensnutzung (RAG): Die angebundene Wissensdatenbank kann Medikamentennamen und ICD-10-Codes "
+    "enthalten. Benutze dieses Wissen AUSSCHLIESSLICH zur Überprüfung und Korrektur von Medikamenten- "
+    "und Fachbegriffen im Transkript. Füge KEINE ICD-10-Codes in den Text ein. Verändere NICHT die "
+    "inhaltliche Bedeutung von Diagnosen oder Aussagen des Sprechers."
+)
+
+DEFAULT_PROMPT_ARZTBRIEF = (
+    "Analysiere den angehängten PDF-Arztbrief und erstelle eine medizinische Zusammenfassung "
+    "für die Hausarztakte. Extrahiere ausschließlich die klinisch relevantesten Informationen: "
+    "neue Diagnosen, Änderungen der Medikation sowie konkrete Therapieempfehlungen oder anstehende "
+    "Untersuchungen. Priorisiere die Vollständigkeit der medizinischen Fakten vor der Kürze, "
+    "versuche jedoch, dich auf etwa 2-3 prägnante Sätze zu beschränken. Die Ausgabe muss zwingend "
+    "als ein einziger, zusammenhängender Fließtext in einer einzigen Zeile erfolgen - ohne "
+    "Zeilenumbrüche, Aufzählungszeichen oder sonstige Formatierungen. Dein Output darf ausschließlich "
+    "die Zusammenfassung enthalten, keinerlei einleitende oder abschließende Sätze. Antworte auf Deutsch."
+)
+
 DEFAULT_CONFIG = {
     "server_url": "https://192.168.10.51:8000/transcribe",
-    "openwebui_url": "http://192.168.10.51:3000/api/chat/completions",
-    "api_key": "API-Key von OpenwebUI hier eintragen",
+    "llm_api_url": "http://localhost:11434/v1/chat/completions",
+    "api_key": "",
     "ca_cert_path": "",
-    "model_ambient": "asklaion-v1",
-    "model_diktat": "diktiersklavev1",
-    "model_arena_a": "asklaion-v1",
-    "model_arena_b": "diktiersklavev1",
-    "model_arztbrief": "arztbriefzusammenfasser",
+    "model_ambient": "llama3.1:8b",
+    "model_diktat": "llama3.1:8b",
+    "model_arena_a": "llama3.1:8b",
+    "model_arena_b": "qwen2.5:14b",
+    "model_arztbrief": "llama3.1:8b",
+    "prompt_ambient": DEFAULT_PROMPT_AMBIENT,
+    "prompt_diktat": DEFAULT_PROMPT_DIKTAT,
+    "prompt_arena_a": DEFAULT_PROMPT_AMBIENT,
+    "prompt_arena_b": DEFAULT_PROMPT_AMBIENT,
+    "prompt_arztbrief": DEFAULT_PROMPT_ARZTBRIEF,
     "input_device": None, # ID or Name
     "loopback_device": None, # ID or Name for System Audio
     "chunk_duration": 30,
@@ -62,6 +138,11 @@ def load_config():
     try:
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             loaded = json.load(f)
+            # Migration: openwebui_url → llm_api_url
+            if "openwebui_url" in loaded and "llm_api_url" not in loaded:
+                loaded["llm_api_url"] = loaded.pop("openwebui_url")
+            elif "openwebui_url" in loaded:
+                loaded.pop("openwebui_url")
             # Neue Keys aus DEFAULT_CONFIG ergänzen (Abwärtskompatibilität)
             for key, value in DEFAULT_CONFIG.items():
                 if key not in loaded:
@@ -83,7 +164,11 @@ def save_config(cfg):
         json.dump(to_save, f, indent=4)
 
 def _tls_verify():
-    """Gibt den Pfad zum CA-Zertifikat zurück, oder True (System-CA-Store)."""
+    """Gibt den Pfad zum CA-Zertifikat zurück, False für localhost, oder True (System-CA-Store)."""
+    server_url = config.get("server_url", "")
+    # Für localhost kein TLS-Verify nötig
+    if "localhost" in server_url or "127.0.0.1" in server_url:
+        return False
     ca = config.get("ca_cert_path", "")
     if ca and os.path.exists(ca):
         return ca
@@ -463,16 +548,17 @@ class ModernRecorder:
         threading.Thread(target=self._run_llm_arztbrief, args=(pdf_text, filename), daemon=True).start()
 
     def _run_llm_arztbrief(self, text, filename):
-        """Sendet PDF-Text an OpenWebUI Modell 'arztbriefzusammenfasser'"""
-        model = config.get("model_arztbrief", "arztbriefzusammenfasser")
-        headers = {"Authorization": f"Bearer {config['api_key']}", "Content-Type": "application/json"}
+        """Sendet PDF-Text direkt an Ollama LLM mit System-Prompt"""
+        model = config.get("model_arztbrief", "llama3.1:8b")
+        system_prompt = config.get("prompt_arztbrief", "")
+        headers = self._build_llm_headers()
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": text}]
+            "messages": self._build_messages(system_prompt, text)
         }
         try:
             self.log(f"Sende an LLM ({model})...")
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=180, verify=_tls_verify())
+            r = requests.post(config["llm_api_url"], headers=headers, json=payload, timeout=180, verify=_tls_verify())
             if r.status_code == 200:
                 result = r.json()['choices'][0]['message']['content']
                 self.log(f"Arztbrief-Zusammenfassung erhalten ({len(result)} Zeichen)")
@@ -540,7 +626,7 @@ class ModernRecorder:
     def open_settings(self):
         win = tk.Toplevel(self.root)
         win.title("Einstellungen")
-        win.geometry("520x650") 
+        win.geometry("620x800")
         win.transient(self.root)
         win.grab_set()
 
@@ -579,8 +665,8 @@ class ModernRecorder:
             return e
 
         e_server = add_entry("Whisper Server URL", "server_url")
-        e_webui = add_entry("OpenWebUI URL", "openwebui_url")
-        e_key = add_entry("API Key (wird verschlüsselt gespeichert)", "api_key")
+        e_webui = add_entry("LLM API URL (Ollama: http://localhost:11434/v1/chat/completions)", "llm_api_url")
+        e_key = add_entry("API Key (optional, Ollama braucht keinen)", "api_key")
 
         # CA-Zertifikat-Auswahl
         tk.Label(content, text="CA-Zertifikat (ca.crt vom Server)", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
@@ -604,12 +690,60 @@ class ModernRecorder:
             messagebox.showinfo("Hinweis", "Windows-Zertifikat-Assistent geöffnet.\nBitte 'Lokaler Computer' → 'Vertrauenswürdige Stammzertifizierungsstellen' wählen.")
         tk.Button(content, text="🌐 Im Browser/System vertrauen (einmalig)", command=install_ca_browser,
                   bg="#3498db", fg="white", font=("Segoe UI", 8), relief="flat").pack(anchor="w", padx=10, pady=(2,0))
-        e_model_amb = add_entry("Ambient Modell ID", "model_ambient")
-        e_model_dik = add_entry("Diktat Modell ID", "model_diktat")
-        e_model_arena_a = add_entry("Arena Modell A", "model_arena_a")
-        e_model_arena_b = add_entry("Arena Modell B", "model_arena_b")
-        e_model_brief = add_entry("Arztbrief Modell ID", "model_arztbrief")
+        # Ollama-Modelle abfragen (versucht localhost:11434 und die konfigurierte URL)
+        ollama_models = []
+        ollama_urls_to_try = ["http://localhost:11434"]
+        configured_url = config.get("llm_api_url", "")
+        if configured_url:
+            # Basis-URL extrahieren (alles vor /v1/ oder /api/)
+            for cut in ["/v1/chat/completions", "/v1/", "/api/chat/completions", "/api/"]:
+                if cut in configured_url:
+                    base = configured_url.split(cut)[0].rstrip("/")
+                    if base not in ollama_urls_to_try:
+                        ollama_urls_to_try.insert(0, base)
+                    break
+        for base_url in ollama_urls_to_try:
+            try:
+                r_models = requests.get(f"{base_url}/api/tags", timeout=3)
+                if r_models.status_code == 200:
+                    ollama_models = sorted([m["name"] for m in r_models.json().get("models", [])])
+                    break
+            except:
+                continue
+
+        def add_model_dropdown(label_text, config_key):
+            tk.Label(content, text=label_text, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+            cb = ttk.Combobox(content, values=ollama_models, width=48)
+            current_val = config.get(config_key, "")
+            cb.set(current_val)
+            cb.pack(padx=10, fill="x")
+            return cb
+
+        e_model_amb = add_model_dropdown("Gespräch — Modell", "model_ambient")
+        e_model_dik = add_model_dropdown("Diktat — Modell", "model_diktat")
+        e_model_arena_a = add_model_dropdown("Arena — Modell A", "model_arena_a")
+        e_model_arena_b = add_model_dropdown("Arena — Modell B", "model_arena_b")
+        e_model_brief = add_model_dropdown("Arztbrief — Modell", "model_arztbrief")
         e_auto_delete = add_entry("Auto-Löschung Transkripte (Tage, 0=aus)", "auto_delete_days")
+
+        # --- System-Prompts ---
+        def add_prompt_field(label_text, config_key):
+            tk.Label(content, text=label_text, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
+            st = scrolledtext.ScrolledText(content, width=55, height=6, wrap="word", font=("Segoe UI", 8))
+            st.insert("1.0", config.get(config_key, ""))
+            st.pack(padx=10, fill="x")
+            return st
+
+        tk.Label(content, text="─── System-Prompts ───", font=("Segoe UI", 10, "bold"),
+                 fg="#2c3e50").pack(anchor="w", padx=10, pady=(15,0))
+        tk.Label(content, text="Hier die Anweisungen für jedes LLM pro Modus festlegen:",
+                 font=("Segoe UI", 8), fg="#7f8c8d").pack(anchor="w", padx=10)
+
+        st_prompt_amb = add_prompt_field("Gespräch — System-Prompt", "prompt_ambient")
+        st_prompt_dik = add_prompt_field("Diktat — System-Prompt", "prompt_diktat")
+        st_prompt_arena_a = add_prompt_field("Arena Modell A — System-Prompt", "prompt_arena_a")
+        st_prompt_arena_b = add_prompt_field("Arena Modell B — System-Prompt", "prompt_arena_b")
+        st_prompt_brief = add_prompt_field("Arztbrief — System-Prompt", "prompt_arztbrief")
 
         # Audio Devices
         devices = sd.query_devices()
@@ -637,7 +771,7 @@ class ModernRecorder:
 
         def save():
             config["server_url"] = e_server.get()
-            config["openwebui_url"] = e_webui.get()
+            config["llm_api_url"] = e_webui.get()
             config["api_key"] = e_key.get()
             config["ca_cert_path"] = e_ca.get().strip()
             config["model_ambient"] = e_model_amb.get()
@@ -645,6 +779,12 @@ class ModernRecorder:
             config["model_arena_a"] = e_model_arena_a.get()
             config["model_arena_b"] = e_model_arena_b.get()
             config["model_arztbrief"] = e_model_brief.get()
+            # System-Prompts speichern
+            config["prompt_ambient"] = st_prompt_amb.get("1.0", "end-1c")
+            config["prompt_diktat"] = st_prompt_dik.get("1.0", "end-1c")
+            config["prompt_arena_a"] = st_prompt_arena_a.get("1.0", "end-1c")
+            config["prompt_arena_b"] = st_prompt_arena_b.get("1.0", "end-1c")
+            config["prompt_arztbrief"] = st_prompt_brief.get("1.0", "end-1c")
             try:
                 config["auto_delete_days"] = int(e_auto_delete.get())
             except ValueError:
@@ -714,7 +854,9 @@ class ModernRecorder:
             else:
                 self.log(f"Server Error {response.status_code}")
         except Exception as e:
-            self.root.after(0, lambda: self.conn_warn.config(text=f"Verbindungsfehler: {str(e)[:30]}..."))
+            err_msg = f"Verbindungsfehler: {str(e)[:30]}..."
+            self.log(err_msg)
+            self.root.after(0, lambda m=err_msg: self.conn_warn.config(text=m))
         
         if is_final:
             self.root.after(0, self.finalize_transcription)
@@ -821,23 +963,46 @@ class ModernRecorder:
         if current_tab_idx == 2:  # Arena mode
             model_a = config["model_arena_a"]
             model_b = config["model_arena_b"]
+            prompt_a = config.get("prompt_arena_a", "")
+            prompt_b = config.get("prompt_arena_b", "")
             self.log(f"Arena: Starte LLM A ({model_a}) und LLM B ({model_b})...")
             self.arena_results = {}
-            threading.Thread(target=self._run_llm_arena, args=(raw_text, model_a, "A"), daemon=True).start()
-            threading.Thread(target=self._run_llm_arena, args=(raw_text, model_b, "B"), daemon=True).start()
+            threading.Thread(target=self._run_llm_arena, args=(raw_text, model_a, "A", prompt_a), daemon=True).start()
+            threading.Thread(target=self._run_llm_arena, args=(raw_text, model_b, "B", prompt_b), daemon=True).start()
         else:
-            model = config["model_diktat"] if current_tab_idx == 1 else config["model_ambient"]
+            if current_tab_idx == 1:
+                model = config["model_diktat"]
+                sys_prompt = config.get("prompt_diktat", "")
+            else:
+                model = config["model_ambient"]
+                sys_prompt = config.get("prompt_ambient", "")
             self.log(f"Starte LLM ({model})...")
-            threading.Thread(target=self._run_llm, args=(raw_text, model), daemon=True).start()
+            threading.Thread(target=self._run_llm, args=(raw_text, model, sys_prompt), daemon=True).start()
 
-    def _run_llm(self, text, model):
-        headers = {"Authorization": f"Bearer {config['api_key']}", "Content-Type": "application/json"}
+    def _build_llm_headers(self):
+        """Erstellt Headers für LLM-API. API-Key nur wenn gesetzt (Ollama braucht keinen)."""
+        headers = {"Content-Type": "application/json"}
+        api_key = config.get("api_key", "").strip()
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        return headers
+
+    def _build_messages(self, system_prompt, user_text):
+        """Erstellt messages-Array mit optionalem System-Prompt."""
+        messages = []
+        if system_prompt and system_prompt.strip():
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_text})
+        return messages
+
+    def _run_llm(self, text, model, system_prompt=""):
+        headers = self._build_llm_headers()
         payload = {
-            "model": model, 
-            "messages": [{"role": "user", "content": text}]
+            "model": model,
+            "messages": self._build_messages(system_prompt, text)
         }
         try:
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
+            r = requests.post(config["llm_api_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
             if r.status_code == 200:
                 res = r.json()['choices'][0]['message']['content']
                 self.root.after(0, lambda: self._show_result(res))
@@ -847,15 +1012,15 @@ class ModernRecorder:
         except Exception as e:
             self.log(f"LLM Exception: {e}")
 
-    def _run_llm_arena(self, text, model, label):
-        headers = {"Authorization": f"Bearer {config['api_key']}", "Content-Type": "application/json"}
+    def _run_llm_arena(self, text, model, label, system_prompt=""):
+        headers = self._build_llm_headers()
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": text}]
+            "messages": self._build_messages(system_prompt, text)
         }
         result = None
         try:
-            r = requests.post(config["openwebui_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
+            r = requests.post(config["llm_api_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
             if r.status_code == 200:
                 result = r.json()['choices'][0]['message']['content']
                 self.log(f"Arena Modell {label} ({model}) fertig.")

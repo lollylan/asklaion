@@ -8,8 +8,8 @@
 
 Bevor Sie die Module in diesem Ordner nutzen können, muss die technische Infrastruktur in Ihrer Praxis stehen. Sollten Sie dies noch nicht erledigt haben, folgen Sie bitte zuerst dieser Anleitung:
 
-👉 **[Basisinstallation KI-Programme](basisinstallation/README.md)**  
-*(Installation von Docker, Ollama und OpenWebUI)*
+👉 **[Basisinstallation KI-Programme](basisinstallation/README.md)**
+*(Installation von Ollama)*
 
 ---
 
@@ -19,8 +19,8 @@ Sobald die Basisinstallation läuft, können Sie die folgenden Anwendungen nutze
 
 | Modul | Inhalt & Zweck | Fokus |
 | --- | --- | --- |
-| **[Komplettscript](komplettscript/README.md)** | **Haupbanwendung:** Ein End-to-End Skript, das Audio aufnimmt, transkribiert und für das PVS (z.B. PegaMed, Turbomed, etc.) aufbereitet. | Vollautomatisierung |
-| **Basisinstallation** | Anleitungen zur Einrichtung der notwendigen Docker-Container. | Infrastruktur |
+| **[Komplettscript](komplettscript/)** | **Hauptanwendung:** Ein End-to-End Skript, das Audio aufnimmt, transkribiert und per Ollama-LLM für das PVS (z.B. PegaMed, Turbomed, etc.) aufbereitet. | Vollautomatisierung |
+| **Basisinstallation** | Anleitung zur Einrichtung von Ollama als lokalem LLM-Backend. | Infrastruktur |
 
 *(Ältere Versionen finden Sie im Ordner `../archiv`)*
 
@@ -39,6 +39,6 @@ Wie bei allen Modulen von **Askl-AI-on** gilt:
 ## 🛠️ Fehlerbehebung
 
 Sollten Probleme auftreten:
-1.  Prüfen Sie, ob **Docker** läuft (`docker ps`).
+1.  Prüfen Sie, ob **Ollama** läuft (`ollama list`).
 2.  Stellen Sie sicher, dass das richtige Mikrofon in den Windows-Einstellungen als Standardgerät gewählt ist.
-3.  Kontrollieren Sie die `config.json` im `komplettscript`-Ordner auf korrekte IP-Adressen.
+3.  Kontrollieren Sie die `config.json` im `komplettscript`-Ordner auf korrekte IP-Adressen und Modell-IDs.
