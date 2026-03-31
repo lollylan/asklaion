@@ -16,7 +16,7 @@ Dieses Modul bietet eine "One-Click"-Lösung für die medizinische Dokumentation
 
 ## 🗂️ Tabs & Funktionen
 
-Das Programm bietet sechs Tabs:
+Das Programm bietet vier Tabs:
 
 | Tab | Funktion | Standard-Modell |
 |---|---|---|
@@ -27,6 +27,11 @@ Das Programm bietet sechs Tabs:
 
 ### 🆕 Neue Funktionen (v1.0)
 
+- **Follow-Up Chat:** Nach jeder LLM-Verarbeitung (Gespräch, Diktat, Arena, Arztbrief) kann das Ergebnis interaktiv verfeinert werden. Das Ergebnis-Fenster bietet:
+  - **Neu generieren** — Setzt den Chat zurück und generiert das Ergebnis komplett neu aus dem Original-Transkript
+  - **Kürzer / Länger** — Passt die Länge der Zusammenfassung per Knopfdruck an
+  - **Freitext-Eingabe** — Beliebige Anweisungen (z.B. "Nutze weibliche Patientin", "Formatiere als Stichpunkte")
+  - Der Original-System-Prompt und das Transkript bleiben im Hintergrund erhalten
 - **PVS-agnostisches Design:** Nicht mehr an PegaMed gebunden — das Ausgabeformat lässt sich durch Anpassung des System-Prompts in den Einstellungen an jedes PVS anpassen.
 - **Automatische Transkript-Löschung (Datenschutz):** Transkripte im Ordner `Transkripte_Raw/` werden beim Programmstart automatisch gelöscht, wenn sie älter als die konfigurierte Anzahl Tage sind (Standard: 1 Tag, konfigurierbar über Einstellungen, 0 = deaktiviert).
 
@@ -123,9 +128,10 @@ python server_GPU_CUDA_Parallel.py
 3. **Dokumentieren:**
    * **Gespräch-Tab:** Aufnahme starten → Gespräch führen → Stop & LLM-Verarbeitung.
    * **Diktat-Tab:** Diktierte Notizen aufnehmen und durch LLM verbessern lassen.
-   * **Arena-Tab:** Zwei Modelle gleichzeitig vergleichen.
+   * **Arena-Tab:** Zwei Modelle gleichzeitig vergleichen → Gewünschtes Modell wählen.
    * **Arztbrief-Tab:** PDF hochladen → Zusammenfassung generieren.
-4. **Einfügen:** Sobald "Fertig!" angezeigt wird, im PVS mit **Strg + V** einfügen.
+4. **Verfeinern (optional):** Im Ergebnis-Fenster per Quick-Buttons oder Freitext-Eingabe das Ergebnis anpassen.
+5. **Einfügen:** Mit **Kopieren & Schließen** oder **Strg + V** in das PVS einfügen.
 
 ---
 
@@ -141,6 +147,7 @@ python server_GPU_CUDA_Parallel.py
 
 * **PVS-kompatible Formatierung:** Das Skript entfernt automatisch Fettdruck-Sterne (`**`) und Rauten (`##`), die in PVS-Systemen oft kryptisch dargestellt werden. Die Zeilenumbrüche werden Windows-kompatibel (`\r\n`) formatiert.
 * **Flexibles Ausgabeformat:** Der System-Prompt bestimmt die Ausgabestruktur und kann direkt in den Einstellungen bearbeitet werden. Der Standard-Prompt ist für PegaMed optimiert — für andere PVS einfach den Prompt anpassen.
+* **Follow-Up Chat:** Ergebnisse können interaktiv verfeinert werden — kürzer, länger, neu generieren oder per Freitext-Anweisung anpassen. Funktioniert in allen Tabs.
 * **Normbefunde:** Häufige Befunde wie "Herz: rein, regelmäßig" können zeitsparend per Knopfdruck ergänzt werden.
 * **Drag-and-Drop:** PDF-Arztbriefe können direkt auf die Anwendung gezogen werden.
 
