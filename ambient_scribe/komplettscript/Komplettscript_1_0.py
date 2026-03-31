@@ -1075,9 +1075,16 @@ class ModernRecorder:
         threading.Thread(target=self._run_followup_llm, daemon=True).start()
 
     def _send_regenerate(self):
-        """Generiert die letzte Antwort neu (gleicher Prompt, frische Antwort)."""
-        if self.chat_session["messages"] and self.chat_session["messages"][-1]["role"] == "assistant":
-            self.chat_session["messages"].pop()
+        """Setzt den Chat auf System-Prompt + Original-Transkript zurück und generiert neu."""
+        # Nur System-Prompt (falls vorhanden) + erste User-Nachricht behalten
+        original = []
+        for msg in self.chat_session["messages"]:
+            if msg["role"] == "system":
+                original.append(msg)
+            elif msg["role"] == "user":
+                original.append(msg)
+                break  # Nur die erste User-Nachricht (= Original-Transkript)
+        self.chat_session["messages"] = original
         # UI sperren
         if self.chat_session["btn_frame"]:
             for w in self.chat_session["btn_frame"].winfo_children():
@@ -1178,20 +1185,23 @@ class ModernRecorder:
             self.chat_session["window"] = win
             self.chat_session["result_text"] = t
 
-            # Quick-Action Buttons
+            # Quick-Action Buttons (volle Breite, gleichmäßig verteilt)
             btn_frame = tk.Frame(win, bg="#f5f7f9")
             btn_frame.pack(fill="x", padx=10, pady=(0, 3))
+            btn_frame.grid_columnconfigure(0, weight=1)
+            btn_frame.grid_columnconfigure(1, weight=1)
+            btn_frame.grid_columnconfigure(2, weight=1)
             self.chat_session["btn_frame"] = btn_frame
 
             tk.Button(btn_frame, text="Neu generieren", command=self._send_regenerate,
-                      bg="#e67e22", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
-                      ).pack(side="left", padx=(0, 4))
+                      bg="#e67e22", fg="white", font=("Segoe UI", 9, "bold"), relief="flat", pady=6
+                      ).grid(row=0, column=0, sticky="ew", padx=(0, 2))
             tk.Button(btn_frame, text="Kürzer", command=lambda: self._send_followup("Fasse die Antwort kürzer zusammen."),
-                      bg="#3498db", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
-                      ).pack(side="left", padx=(0, 4))
+                      bg="#3498db", fg="white", font=("Segoe UI", 9, "bold"), relief="flat", pady=6
+                      ).grid(row=0, column=1, sticky="ew", padx=2)
             tk.Button(btn_frame, text="Länger", command=lambda: self._send_followup("Führe die Antwort ausführlicher aus."),
-                      bg="#3498db", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
-                      ).pack(side="left")
+                      bg="#3498db", fg="white", font=("Segoe UI", 9, "bold"), relief="flat", pady=6
+                      ).grid(row=0, column=2, sticky="ew", padx=(2, 0))
 
             # Freitext-Eingabe
             input_frame = tk.Frame(win, bg="#f5f7f9")
