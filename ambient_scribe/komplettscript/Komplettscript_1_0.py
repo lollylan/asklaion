@@ -299,9 +299,15 @@ class ModernRecorder:
         self.arena_results = {}
         self.arena_lock = threading.Lock()
         self.patient_files = []  # Liste der angehängten Dateipfade
-        self.doc_chat_files = []  # Dokumentenbefragung Dateipfade
-        self.doc_chat_messages = []  # Chat-Verlauf [{role, content}]
-        self.doc_chat_text = ""  # Extrahierter Dokumententext
+        self._arena_raw_text = ""  # Rohtext für Arena-Follow-Up
+        self.chat_session = {
+            "messages": [],      # [{role, content}, ...] voller Chat-Verlauf
+            "model": None,       # Ollama-Modell für Follow-Ups
+            "window": None,      # Toplevel-Referenz
+            "result_text": None, # ScrolledText Widget
+            "input_entry": None, # Entry Widget
+            "btn_frame": None,   # Frame mit Action-Buttons
+        }
 
         self._setup_ui()
         self._start_upload_worker()
@@ -562,7 +568,7 @@ class ModernRecorder:
             if r.status_code == 200:
                 result = r.json()['choices'][0]['message']['content']
                 self.log(f"Arztbrief-Zusammenfassung erhalten ({len(result)} Zeichen)")
-                self.root.after(0, lambda: self._show_arztbrief_done(result, filename))
+                self.root.after(0, lambda: self._show_arztbrief_done(result, filename, model, system_prompt, text))
             else:
                 self.log(f"LLM Fehler: {r.status_code} - {r.text}")
                 self.root.after(0, lambda: self._arztbrief_error())
@@ -570,13 +576,13 @@ class ModernRecorder:
             self.log(f"LLM Exception: {e}")
             self.root.after(0, lambda: self._arztbrief_error())
 
-    def _show_arztbrief_done(self, result, filename):
+    def _show_arztbrief_done(self, result, filename, model=None, system_prompt=None, user_text=None):
         """Zeigt Ergebnis an und aktiviert Button wieder"""
         self.arztbrief_status.config(text=f"✅ {filename} analysiert", fg="#27ae60")
         self.status_label.config(text="FERTIG", fg="#2ecc71")
         self.status_dot.config(fg="#2ecc71")
         self.btn_pdf.config(state="normal", bg="#3498db")
-        self._show_result(result)
+        self._show_result(result, model, system_prompt, user_text)
 
     def _arztbrief_error(self):
         """Fehlerbehandlung für Arztbrief LLM"""
@@ -967,6 +973,7 @@ class ModernRecorder:
             prompt_b = config.get("prompt_arena_b", "")
             self.log(f"Arena: Starte LLM A ({model_a}) und LLM B ({model_b})...")
             self.arena_results = {}
+            self._arena_raw_text = raw_text
             threading.Thread(target=self._run_llm_arena, args=(raw_text, model_a, "A", prompt_a), daemon=True).start()
             threading.Thread(target=self._run_llm_arena, args=(raw_text, model_b, "B", prompt_b), daemon=True).start()
         else:
@@ -1005,7 +1012,7 @@ class ModernRecorder:
             r = requests.post(config["llm_api_url"], headers=headers, json=payload, timeout=120, verify=_tls_verify())
             if r.status_code == 200:
                 res = r.json()['choices'][0]['message']['content']
-                self.root.after(0, lambda: self._show_result(res))
+                self.root.after(0, lambda: self._show_result(res, model, system_prompt, text))
             else:
                 self.log(f"LLM Fehler: {r.status_code} - {r.text}")
                 self.root.after(0, lambda: self.status_label.config(text="FEHLER", fg="red"))
@@ -1034,39 +1041,188 @@ class ModernRecorder:
             if len(self.arena_results) == 2:
                 res_a = self.arena_results.get("A")
                 res_b = self.arena_results.get("B")
-                self.root.after(0, lambda: self._show_arena_result(res_a, res_b))
+                m_a = config.get("model_arena_a", "")
+                m_b = config.get("model_arena_b", "")
+                p_a = config.get("prompt_arena_a", "")
+                p_b = config.get("prompt_arena_b", "")
+                raw = self._arena_raw_text
+                self.root.after(0, lambda: self._show_arena_result(
+                    res_a, res_b, raw, m_a, p_a, m_b, p_b))
 
-    def _show_result(self, text):
+    # --- Follow-Up Chat ---
+
+    def _reset_chat_session(self):
+        """Setzt den Chat-Verlauf zurück."""
+        self.chat_session = {
+            "messages": [], "model": None, "window": None,
+            "result_text": None, "input_entry": None, "btn_frame": None,
+        }
+
+    def _send_followup(self, instruction):
+        """Sendet eine Follow-Up-Nachricht an das LLM mit vollem Chat-Verlauf."""
+        if not instruction or not instruction.strip():
+            return
+        self.chat_session["messages"].append({"role": "user", "content": instruction.strip()})
+        # UI sperren
+        if self.chat_session["btn_frame"]:
+            for w in self.chat_session["btn_frame"].winfo_children():
+                try: w.config(state="disabled")
+                except: pass
+        if self.chat_session["input_entry"]:
+            self.chat_session["input_entry"].config(state="disabled")
+        self.status_label.config(text="FOLLOW-UP...", fg="#f39c12")
+        self.status_dot.config(fg="#f39c12")
+        threading.Thread(target=self._run_followup_llm, daemon=True).start()
+
+    def _send_regenerate(self):
+        """Generiert die letzte Antwort neu (gleicher Prompt, frische Antwort)."""
+        if self.chat_session["messages"] and self.chat_session["messages"][-1]["role"] == "assistant":
+            self.chat_session["messages"].pop()
+        # UI sperren
+        if self.chat_session["btn_frame"]:
+            for w in self.chat_session["btn_frame"].winfo_children():
+                try: w.config(state="disabled")
+                except: pass
+        if self.chat_session["input_entry"]:
+            self.chat_session["input_entry"].config(state="disabled")
+        self.status_label.config(text="NEU GENERIEREN...", fg="#f39c12")
+        self.status_dot.config(fg="#f39c12")
+        threading.Thread(target=self._run_followup_llm, daemon=True).start()
+
+    def _run_followup_llm(self):
+        """Background-Thread: Sendet vollen Chat-Verlauf an Ollama."""
+        headers = self._build_llm_headers()
+        payload = {
+            "model": self.chat_session["model"],
+            "messages": list(self.chat_session["messages"])
+        }
+        try:
+            r = requests.post(config["llm_api_url"], headers=headers, json=payload, timeout=180, verify=_tls_verify())
+            if r.status_code == 200:
+                res = r.json()['choices'][0]['message']['content']
+                self.chat_session["messages"].append({"role": "assistant", "content": res})
+                self.root.after(0, lambda: self._update_chat_result(res))
+            else:
+                self.log(f"Follow-Up LLM Fehler: {r.status_code} - {r.text}")
+                self.root.after(0, lambda: self._followup_done_enable())
+        except Exception as e:
+            self.log(f"Follow-Up LLM Exception: {e}")
+            self.root.after(0, lambda: self._followup_done_enable())
+
+    def _update_chat_result(self, new_text):
+        """Aktualisiert das Ergebnis-Fenster mit der neuen LLM-Antwort."""
+        win = self.chat_session.get("window")
+        if not win or not win.winfo_exists():
+            self._reset_chat_session()
+            return
+        clean_text = new_text.replace("**", "").replace("##", "")
+        windows_text = clean_text.replace("\r\n", "\n").replace("\n", "\r\n")
+        pyperclip.copy(windows_text)
+        t = self.chat_session["result_text"]
+        t.config(state="normal")
+        t.delete("1.0", tk.END)
+        t.insert(tk.END, clean_text)
         self.status_label.config(text="FERTIG", fg="#2ecc71")
         self.status_dot.config(fg="#2ecc71")
-        
+        self._followup_done_enable()
+
+    def _followup_done_enable(self):
+        """Aktiviert Buttons und Eingabefeld nach Follow-Up."""
+        if self.chat_session["btn_frame"] and self.chat_session["btn_frame"].winfo_exists():
+            for w in self.chat_session["btn_frame"].winfo_children():
+                try: w.config(state="normal")
+                except: pass
+        if self.chat_session["input_entry"] and self.chat_session["input_entry"].winfo_exists():
+            self.chat_session["input_entry"].config(state="normal")
+            self.chat_session["input_entry"].delete(0, tk.END)
+        self.status_label.config(text="FERTIG", fg="#2ecc71")
+        self.status_dot.config(fg="#2ecc71")
+
+    def _show_result(self, text, model=None, system_prompt=None, user_text=None):
+        self.status_label.config(text="FERTIG", fg="#2ecc71")
+        self.status_dot.config(fg="#2ecc71")
+
+        # Altes Chat-Fenster schließen falls noch offen
+        old_win = self.chat_session.get("window")
+        if old_win and old_win.winfo_exists():
+            old_win.destroy()
+        self._reset_chat_session()
+
         clean_text = text.replace("**", "").replace("##", "")
         windows_text = clean_text.replace("\r\n", "\n").replace("\n", "\r\n")
         pyperclip.copy(windows_text)
-        
+
         win = tk.Toplevel(self.root)
         win.title("Ergebnis")
-        win.geometry("600x700")
+        win.geometry("600x800")
         win.transient(self.root)
-        # Über dem Hauptfenster zentrieren
         win.update_idletasks()
         x = self.root.winfo_x() + (self.root.winfo_width() - 600) // 2
-        y = self.root.winfo_y() + (self.root.winfo_height() - 700) // 2
-        win.geometry(f"600x700+{x}+{y}")
-        
+        y = self.root.winfo_y() + (self.root.winfo_height() - 800) // 2
+        win.geometry(f"600x800+{x}+{y}")
+
+        # Ergebnis-Textfeld
         t = scrolledtext.ScrolledText(win, font=("Segoe UI", 11), wrap=tk.WORD)
-        t.pack(fill="both", expand=True, padx=10, pady=10)
+        t.pack(fill="both", expand=True, padx=10, pady=(10, 5))
         t.insert(tk.END, clean_text)
-        
-        def close(): 
+
+        # Chat-Session initialisieren
+        if model and user_text is not None:
+            messages = []
+            if system_prompt and system_prompt.strip():
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": user_text})
+            messages.append({"role": "assistant", "content": text})
+            self.chat_session["messages"] = messages
+            self.chat_session["model"] = model
+            self.chat_session["window"] = win
+            self.chat_session["result_text"] = t
+
+            # Quick-Action Buttons
+            btn_frame = tk.Frame(win, bg="#f5f7f9")
+            btn_frame.pack(fill="x", padx=10, pady=(0, 3))
+            self.chat_session["btn_frame"] = btn_frame
+
+            tk.Button(btn_frame, text="Neu generieren", command=self._send_regenerate,
+                      bg="#e67e22", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
+                      ).pack(side="left", padx=(0, 4))
+            tk.Button(btn_frame, text="Kürzer", command=lambda: self._send_followup("Fasse die Antwort kürzer zusammen."),
+                      bg="#3498db", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
+                      ).pack(side="left", padx=(0, 4))
+            tk.Button(btn_frame, text="Länger", command=lambda: self._send_followup("Führe die Antwort ausführlicher aus."),
+                      bg="#3498db", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
+                      ).pack(side="left")
+
+            # Freitext-Eingabe
+            input_frame = tk.Frame(win, bg="#f5f7f9")
+            input_frame.pack(fill="x", padx=10, pady=(0, 5))
+
+            entry = tk.Entry(input_frame, font=("Segoe UI", 10))
+            entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+            self.chat_session["input_entry"] = entry
+
+            def send_custom(event=None):
+                txt = entry.get().strip()
+                if txt:
+                    self._send_followup(txt)
+
+            tk.Button(input_frame, text="Senden", command=send_custom,
+                      bg="#27ae60", fg="white", font=("Segoe UI", 9), relief="flat", padx=8, pady=4
+                      ).pack(side="right")
+            entry.bind("<Return>", send_custom)
+
+        # Kopieren & Schließen
+        def close():
             final_text = t.get("1.0", tk.END).strip()
             final_text = final_text.replace("\r\n", "\n").replace("\n", "\r\n")
             pyperclip.copy(final_text)
+            self._reset_chat_session()
             win.destroy()
-            
-        tk.Button(win, text="Kopieren & Schließen", command=close, bg="#34495e", fg="white", pady=10).pack(fill="x")
 
-    def _show_arena_result(self, result_a, result_b):
+        tk.Button(win, text="Kopieren & Schließen", command=close, bg="#34495e", fg="white", pady=10).pack(fill="x")
+        win.protocol("WM_DELETE_WINDOW", close)
+
+    def _show_arena_result(self, result_a, result_b, raw_text="", model_a="", prompt_a="", model_b="", prompt_b=""):
         self.status_label.config(text="ARENA FERTIG", fg="#2ecc71")
         self.status_dot.config(fg="#2ecc71")
 
@@ -1080,7 +1236,6 @@ class ModernRecorder:
         win.title("Arena – Ergebnis-Vergleich")
         win.geometry("1100x700")
         win.transient(self.root)
-        # Über dem Hauptfenster zentrieren
         win.update_idletasks()
         x = self.root.winfo_x() + (self.root.winfo_width() - 1100) // 2
         y = self.root.winfo_y() + (self.root.winfo_height() - 700) // 2
@@ -1107,16 +1262,16 @@ class ModernRecorder:
         btn_frame = tk.Frame(win, bg="#f5f7f9")
         btn_frame.pack(fill="x", padx=10, pady=(0, 10))
 
-        def choose(text_widget, label):
-            final_text = text_widget.get("1.0", tk.END).strip()
-            final_text = final_text.replace("\r\n", "\n").replace("\n", "\r\n")
-            pyperclip.copy(final_text)
-            self.log(f"Arena: Modell {label} gewählt und kopiert.")
+        def choose(text_widget, label, chosen_model, chosen_prompt):
+            chosen_text = text_widget.get("1.0", tk.END).strip()
+            original_result = result_a if label == "A" else result_b
+            self.log(f"Arena: Modell {label} gewählt.")
             win.destroy()
+            self._show_result(original_result or chosen_text, chosen_model, chosen_prompt, raw_text)
 
-        tk.Button(btn_frame, text=f"✔ Modell A wählen & kopieren", command=lambda: choose(text_a, "A"),
+        tk.Button(btn_frame, text=f"✔ Modell A wählen", command=lambda: choose(text_a, "A", model_a, prompt_a),
                   bg="#27ae60", fg="white", font=("Segoe UI", 10, "bold"), pady=8).pack(side="left", fill="x", expand=True, padx=(0, 5))
-        tk.Button(btn_frame, text=f"✔ Modell B wählen & kopieren", command=lambda: choose(text_b, "B"),
+        tk.Button(btn_frame, text=f"✔ Modell B wählen", command=lambda: choose(text_b, "B", model_b, prompt_b),
                   bg="#2980b9", fg="white", font=("Segoe UI", 10, "bold"), pady=8).pack(side="right", fill="x", expand=True, padx=(5, 0))
 
 if __name__ == "__main__":
