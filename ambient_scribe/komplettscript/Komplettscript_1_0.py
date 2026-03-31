@@ -672,7 +672,6 @@ class ModernRecorder:
 
         e_server = add_entry("Whisper Server URL", "server_url")
         e_webui = add_entry("LLM API URL (Ollama: http://localhost:11434/v1/chat/completions)", "llm_api_url")
-        e_key = add_entry("API Key (optional, Ollama braucht keinen)", "api_key")
 
         # CA-Zertifikat-Auswahl
         tk.Label(content, text="CA-Zertifikat (ca.crt vom Server)", font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(10,0))
@@ -778,7 +777,6 @@ class ModernRecorder:
         def save():
             config["server_url"] = e_server.get()
             config["llm_api_url"] = e_webui.get()
-            config["api_key"] = e_key.get()
             config["ca_cert_path"] = e_ca.get().strip()
             config["model_ambient"] = e_model_amb.get()
             config["model_diktat"] = e_model_dik.get()
