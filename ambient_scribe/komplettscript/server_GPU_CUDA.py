@@ -89,7 +89,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     cert_file, key_file, ca_cert_file, ip = ensure_tls_certs()
-    print(f"\n✅ Server läuft auf: https://{ip}:8000")
-    print(f"📋 CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
+    print(f"\n[OK] Server laeuft auf: https://{ip}:8000")
+    print(f"[INFO] CA-Zertifikat (einmalig auf jeden Client-PC kopieren): {ca_cert_file}\n")
     # Startet den Server auf allen Netzwerkschnittstellen (wichtig für Zugriff aus Zimmern)
     uvicorn.run(app, host="0.0.0.0", port=8000, ssl_certfile=cert_file, ssl_keyfile=key_file)
