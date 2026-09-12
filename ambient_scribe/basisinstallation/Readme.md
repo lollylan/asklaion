@@ -30,9 +30,11 @@ ollama run llama3.2
 Laden Sie die Modelle herunter, die das Komplettscript standardmäßig nutzt:
 
 ```bash
-ollama pull llama3.1:8b
-ollama pull qwen2.5:14b
+ollama pull gemma4:12b
+ollama pull qwen3.5:9b
 ```
+
+> **VRAM-Hinweis:** Der Praxisserver belegt für Whisper large-v3-turbo ca. 1,6 GB. Auf einer 24-GB-Karte bleibt damit Platz für ein LLM bis ca. 27B (Q4). Sollen mehrere Zimmer gleichzeitig zusammenfassen, in Ollama `OLLAMA_NUM_PARALLEL=2` setzen.
 
 > **Tipp:** Weitere Modelle finden Sie unter [ollama.com/library](https://ollama.com/library). In den Einstellungen der App können Sie die Modellzuordnung jederzeit ändern.
 
@@ -48,4 +50,4 @@ ollama pull qwen2.5:14b
 
 ## 💡 Nächste Schritte
 
-Sobald diese drei Komponenten laufen, ist Ihre Praxis bereit für den Einsatz von **Ambient-Scribe**.
+Sobald Ollama läuft, starten Sie den Praxisserver (`server.py`) und die Clients – siehe [Komplettscript](../komplettscript/Readme.md).

@@ -17,6 +17,11 @@ certs/
 
 # Konfiguration (maschinenspezifisch, enthaelt verschluesselten API-Key)
 config.json
+server_config.json
+
+# Automatisch geladene Modelle (Sprechertrennung) und angelernte Stimmen
+models/
+enrollments/
 
 # Claude Code
 .claude/

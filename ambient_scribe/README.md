@@ -19,7 +19,7 @@ Sobald die Basisinstallation läuft, können Sie die folgenden Anwendungen nutze
 
 | Modul | Inhalt & Zweck | Fokus |
 | --- | --- | --- |
-| **[Komplettscript](komplettscript/)** | **Hauptanwendung:** Ein End-to-End Skript, das Audio aufnimmt, transkribiert und per Ollama-LLM für das PVS (z.B. PegaMed, Turbomed, etc.) aufbereitet. | Vollautomatisierung |
+| **[Komplettscript v2.0](komplettscript/)** | **Hauptanwendung:** Praxisserver (Whisper-Transkription, Sprechertrennung ARZT/PATIENT, Ollama-Proxy) + Client für jedes Behandlungszimmer, der Audio aufnimmt und das Ergebnis für das PVS (z.B. PegaMed, Turbomed, etc.) aufbereitet. Mehrere Zimmer gleichzeitig, ein Server. | Vollautomatisierung |
 | **Basisinstallation** | Anleitung zur Einrichtung von Ollama als lokalem LLM-Backend. | Infrastruktur |
 
 *(Ältere Versionen finden Sie im Ordner `../archiv`)*
@@ -42,3 +42,4 @@ Sollten Probleme auftreten:
 1.  Prüfen Sie, ob **Ollama** läuft (`ollama list`).
 2.  Stellen Sie sicher, dass das richtige Mikrofon in den Windows-Einstellungen als Standardgerät gewählt ist.
 3.  Kontrollieren Sie die `config.json` im `komplettscript`-Ordner auf korrekte IP-Adressen und Modell-IDs.
+4.  Prüfen Sie mit `https://<Server-IP>:8000/health` im Browser, ob der Praxisserver läuft (Modell, GPU, Sprechertrennung).

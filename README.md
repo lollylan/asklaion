@@ -32,7 +32,7 @@ Bitte beachten Sie unsere detaillierte [Sicherheitsrichtlinie](SECURITY.md).
 
 - **100% Lokal:** Keine Daten verlassen Ihre Praxis. Sprachverarbeitung und Textgenerierung finden ausschließlich auf Ihrer eigenen Hardware statt.
 - **Transparenz:** Da der Quellcode offen liegt, können Sie jederzeit nachvollziehen, was mit den Daten passiert.
-- **Keine Hintertüren:** Wir nutzen etablierte Open-Source-Modelle (wie Llama, Whisper via Ollama), die so konfiguriert sind, dass sie keine Daten nach Hause telefonieren.
+- **Keine Hintertüren:** Wir nutzen etablierte Open-Source-Modelle (Whisper, pyannote/WeSpeaker für die Sprechertrennung, LLMs via Ollama), die so konfiguriert sind, dass sie keine Daten nach Hause telefonieren.
 
 ---
 
@@ -43,8 +43,8 @@ Das Repository ist modular aufgebaut, um verschiedene Anwendungsfälle abzudecke
 ### 1. **Ambient Scribe (Hauptanwendung)**
 *Ordner: [`ambient_scribe`](ambient_scribe/)*
 Das Herzstück für den täglichen Einsatz.
-- **Funktion:** Automatische Transkription und Zusammenfassung von Patientengesprächen in Echtzeit.
-- **Technologie:** Python, Ollama, Whisper (lokal).
+- **Funktion:** Automatische Transkription mit Sprechertrennung (Arzt/Patient) und Zusammenfassung von Patientengesprächen – ein Praxisserver für alle Behandlungszimmer.
+- **Technologie:** Python, faster-whisper (GPU), sherpa-onnx, Ollama – alles lokal.
 - **Setup:** Siehe separate [Dokumentation](ambient_scribe/README.md).
 
 ### 2. **Automatisierungen**

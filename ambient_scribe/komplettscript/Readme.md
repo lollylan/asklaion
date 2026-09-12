@@ -1,160 +1,200 @@
-# Askl-AI-on | Ambient-Scribe v1.0: Vollautomatisierung
+# Askl-AI-on | Ambient-Scribe v2.0: Praxisserver + Client
 
-Dieses Modul bietet eine "One-Click"-Lösung für die medizinische Dokumentation. Es verknüpft die lokale Audioaufnahme, die KI-Transkription und die Zusammenfassung durch ein lokales Sprachmodell (LLM) zu einem nahtlosen Workflow — inklusive Arztbriefzusammenfassung, Patientenanalyse und interaktive Dokumentenbefragung.
+Dieses Modul ist die "One-Click"-Lösung für die medizinische Dokumentation: Ein **Praxisserver** (ein Rechner mit GPU im Praxisnetz) transkribiert die Gespräche aller Behandlungszimmer, trennt die Sprecher und stellt das lokale Sprachmodell (Ollama) bereit. Auf jedem Behandlungsplatz läuft nur der leichte **Client**, der das Mikrofon aufnimmt und das Ergebnis für das PVS aufbereitet.
+
+```
+ Zimmer 1: Komplettscript_2_0  ─┐
+ Zimmer 2: Komplettscript_2_0  ─┼── HTTPS (ein Port) ──►  Praxisserver (server.py)
+ Zimmer 3: Komplettscript_2_0  ─┘                          ├─ Whisper large-v3-turbo (GPU)
+                                                            ├─ Sprechertrennung (CPU)
+                                                            └─ Ollama-Proxy (LLM)
+```
+
+Jedes Gespräch bekommt auf dem Server eine eigene **Sitzung** – mehrere Zimmer können gleichzeitig aufnehmen, ohne dass sich etwas vermischt.
+
+---
+
+## 🆕 Was ist neu in v2.0
+
+| Bereich | v1.0 | v2.0 |
+|---|---|---|
+| Transkription | Whisper large-v3, unbatched | large-v3-turbo mit Batch-Pipeline, Silero-VAD, Hotwords, Wortzeitstempeln – **ca. 10x schneller** (20 s Audio in 0,2–0,5 s auf einer RTX 4090) |
+| Stille / Halluzinationen | keine Behandlung | VAD entfernt Stille vor der Erkennung, bekannte Whisper-Phantomsätze ("Untertitel …") und Wiederholungsschleifen werden verworfen, stille Chunks werden gar nicht erst gesendet |
+| Chunking | harter Schnitt alle 30 s (zerschnittene Wörter) | Schnitt an der nächsten Sprechpause (Standard 20 s + max. 8 s Wartezeit) |
+| Sprecher | – | **ARZT / PATIENT / SPRECHER n** – die eigene Stimme kann angelernt werden |
+| Medikamente | nur über den LLM-Prompt | Praxisvokabular (`vokabular_medizin.txt`, ~700 Begriffe) als Whisper-Hotwords + automatische Korrektur ähnlich klingender Wörter ("Raemipril" → "Ramipril") + **Kontextfeld** für den Medikationsplan des Patienten |
+| Mehrbenutzer | ein Endpunkt, Temp-Dateien | Sitzungen mit eigener ID, Audio nur im Arbeitsspeicher, automatische Bereinigung |
+| LLM | OpenAI-kompatibler Endpunkt ohne Kontextlänge (lange Gespräche wurden still abgeschnitten) | Ollama-API mit explizitem `num_ctx` (16k) und Temperatur, Streaming der Antwort, Denkmodus aus, Proxy über den Praxisserver |
+| Server | drei Skripte (CPU / GPU / Parallel) | ein `server.py`, Konfiguration in `server_config.json` (Modell, Gerät, Ports, API-Key) |
 
 ---
 
 ## 📋 Funktionsweise
 
-1. **Audioaufnahme:** Der Client nimmt das Gespräch am Behandlungsplatz auf.
-2. **CPU-Optimierte Transkription:** Die Audiodaten werden an einen Server gesendet, der mit `faster-whisper` den Text extrahiert. In diesem Beispiel findet die Transkription auf der CPU statt, um in der GPU mehr Platz für ein größeres LLM zu haben. Das Script nutzt Whisper Medium.
-3. **Alternative: GPU-Transkription mit NVIDIA-Grafikkarte:** Falls der Transkriptionsserver eine ausreichende Grafikleistung aufweist, kann man auch das deutlich schnellere und genauere Serverscript ausführen, das NVIDIA CUDA Toolkit (muss separat installiert werden) nutzt. Dieses nutzt Whisper Large-V3, das stärkste Whisper-Modell, um eine bestmögliche Transkriptionsqualität zu erreichen. Wenn mehrere Behandler gleichzeitig die KI-Transkription nutzen wollen, bitte das Script `server_GPU_Cuda_Parallel.py` nutzen, damit die Diktate nicht "vermischt" werden.
-4. **LLM-Verarbeitung:** Der Text wird direkt an **Ollama** gesendet, wo ein lokales Sprachmodell die medizinische Zusammenfassung erstellt oder das Diktat verbessert.
-5. **PVS-kompatible Ausgabe:** Das Skript bereinigt den Text von Markdown-Symbolen (wie `**` oder `##`) und konvertiert Zeilenumbrüche so, dass sie in gängigen PVS (z.B. PegaMed, Tomedo, Medistar) mit `Strg + V` korrekt eingefügt werden können. Der Standard-System-Prompt ist für **PegaMed** optimiert und direkt in der App hinterlegt. Andere PVS-Systeme sind selbstverständlich ebenfalls nutzbar — der System-Prompt kann in den Einstellungen an das gewünschte Ausgabeformat angepasst werden.
+1. **Aufnahme:** Der Client nimmt am Behandlungsplatz auf. Alle ~20 s wird an der nächsten Sprechpause ein Chunk geschnitten und an den Server geschickt.
+2. **Transkription:** Der Server erkennt den Text (Whisper) und zerlegt den Chunk im Hintergrund in Sprechabschnitte mit Stimm-Embeddings (Sprechertrennung).
+3. **Live-Transkript:** Der Client zeigt den erkannten Text während des Gesprächs an.
+4. **Abschluss ("Analyse"):** Der letzte Rest wird übertragen, die Sprecher werden global zugeordnet, angelernte Stimmen (z. B. `ARZT`) erkannt. Das dauert typischerweise 1–3 s.
+5. **LLM-Verarbeitung:** Das Transkript (mit Sprecherlabels, Notizen, Normbefunden und Kontext) geht an **Ollama** – über den Praxisserver, so dass die Clients nur eine Adresse kennen müssen. Die Antwort wird gestreamt angezeigt und liegt am Ende in der Zwischenablage.
+6. **PVS-Ausgabe:** Markdown wird entfernt, Zeilenumbrüche werden Windows-kompatibel gesetzt (`Strg + V` in PegaMed, Tomedo, Medistar …). Der Standard-Prompt ist für **PegaMed** (AN/BE/LD/TH) optimiert und in den Einstellungen anpassbar.
 
 ---
 
 ## 🗂️ Tabs & Funktionen
 
-Das Programm bietet vier Tabs:
+| Tab | Funktion |
+|---|---|
+| **Gespräch** | Ambient-Scribe mit Sprechertrennung, Kontextfeld, Notizen, Normbefunden, Live-Transkript |
+| **Diktat** | Diktat aufnehmen und durch das LLM stilistisch überarbeiten lassen (ohne Sprechertrennung) |
+| **Arena** | Zwei LLM-Modelle gleichzeitig vergleichen |
+| **Arztbrief** | PDF-Arztbriefe hochladen und zusammenfassen lassen |
 
-| Tab | Funktion | Standard-Modell |
-|---|---|---|
-| **Gespräch** | Ambient-Scribe: Arzt-Patienten-Gespräch aufnehmen und zusammenfassen | `llama3.1:8b` |
-| **Diktat** | Diktiertes Transkript durch LLM stilistisch überarbeiten | `llama3.1:8b` |
-| **Arena** | Zwei LLM-Modelle gleichzeitig vergleichen | `llama3.1:8b` / `qwen2.5:14b` |
-| **Arztbrief** | PDF-Arztbriefe hochladen und zusammenfassen lassen | `llama3.1:8b` |
+**Follow-Up Chat** (alle Tabs): Im Ergebnisfenster lässt sich das Ergebnis mit *Neu generieren*, *Kürzer*, *Länger* oder einer Freitext-Anweisung verfeinern. *Transkript* zeigt den Rohtext, der an das LLM ging.
 
-### 🆕 Neue Funktionen (v1.0)
-
-- **Follow-Up Chat:** Nach jeder LLM-Verarbeitung (Gespräch, Diktat, Arena, Arztbrief) kann das Ergebnis interaktiv verfeinert werden. Das Ergebnis-Fenster bietet:
-  - **Neu generieren** — Setzt den Chat zurück und generiert das Ergebnis komplett neu aus dem Original-Transkript
-  - **Kürzer / Länger** — Passt die Länge der Zusammenfassung per Knopfdruck an
-  - **Freitext-Eingabe** — Beliebige Anweisungen (z.B. "Nutze weibliche Patientin", "Formatiere als Stichpunkte")
-  - Der Original-System-Prompt und das Transkript bleiben im Hintergrund erhalten
-- **PVS-agnostisches Design:** Nicht mehr an PegaMed gebunden — das Ausgabeformat lässt sich durch Anpassung des System-Prompts in den Einstellungen an jedes PVS anpassen.
-- **Automatische Transkript-Löschung (Datenschutz):** Transkripte im Ordner `Transkripte_Raw/` werden beim Programmstart automatisch gelöscht, wenn sie älter als die konfigurierte Anzahl Tage sind (Standard: 1 Tag, konfigurierbar über Einstellungen, 0 = deaktiviert).
+**Kontextfeld (Gespräch):** Vor dem Start den aktuellen Medikationsplan / Vorerkrankungen aus dem PVS einfügen. Die Begriffe werden als Whisper-Hotwords genutzt (bessere Erkennung genau dieser Präparate) und dem LLM als verlässlicher Kontext mitgegeben.
 
 ---
 
-## 🛠️ Voraussetzungen
+## 🛠️ Installation
 
-### 1. Python-Installation
+### Server (ein Rechner im Praxisnetz)
 
-Beide Systeme (Server und Client) benötigen **Python 3.10+**.
-
-### 2. Abhängigkeiten installieren
-
-Führen Sie in Ihrem Terminal folgende Befehle aus:
-
-**Auf dem Server (Transkription):**
+Voraussetzungen: Python 3.10–3.14, NVIDIA-GPU mit aktuellem Treiber (empfohlen, ein CUDA-Toolkit ist **nicht** nötig) und [Ollama](https://ollama.com/download).
 
 ```bash
-pip install fastapi uvicorn faster-whisper
+pip install -r requirements-server.txt
+python server.py
 ```
 
-**Auf dem Client (Praxis-PC):**
+Beim ersten Start werden
+
+* das Whisper-Modell (large-v3-turbo, ~1,6 GB) von Hugging Face,
+* die Modelle für die Sprechertrennung (~33 MB) von GitHub nach `models/`,
+* `server_config.json`, `vokabular_medizin.txt` und die TLS-Zertifikate in `certs/`
+
+angelegt. Die Konsole zeigt die Adresse (`https://<IP>:8000`) und den Pfad zur `ca.crt`, die einmalig auf jeden Client-PC kopiert wird.
+
+Ollama-Modelle laden, z. B.:
 
 ```bash
-pip install sounddevice numpy requests scipy pyperclip PyPDF2 windnd
+ollama pull gemma4:12b
+ollama pull qwen3.5:9b
 ```
 
-| Paket | Zweck |
-|---|---|
-| `sounddevice` | Audioaufnahme |
-| `numpy` | Audio-Datenverarbeitung |
-| `requests` | HTTP-Kommunikation mit Server & Ollama |
-| `scipy` | WAV-Export |
-| `pyperclip` | Kopieren in Zwischenablage |
-| `PyPDF2` | PDF-Textextraktion (Arztbrief) |
-| `windnd` | Drag-and-Drop Unterstützung (optional, nur Windows) |
+> **VRAM-Budget (24 GB, z. B. RTX 4090):** Whisper large-v3-turbo belegt ~1,6 GB, large-v3 ~3 GB. Der Rest steht Ollama zur Verfügung – ein 12B–27B-Modell in Q4 passt problemlos daneben; 31B-Modelle werden knapp. Damit mehrere Zimmer gleichzeitig zusammenfassen können, in Ollama `OLLAMA_NUM_PARALLEL=2` (oder höher) setzen.
 
-> **Hinweis:** `tkinter` ist unter Windows standardmäßig mit Python enthalten und muss nicht separat installiert werden.
+### Client (jeder Behandlungsplatz)
+
+```bash
+pip install -r requirements-client.txt
+python Komplettscript_2_0.py
+```
+
+In den **⚙ Einstellungen**: Server-Adresse (`https://<Server-IP>:8000`), `ca.crt` auswählen, Mikrofon wählen, Modelle aus der Liste wählen (wird vom Server geholt), optional *Eigene Stimme anlernen*.
+
+> Die Server-Adresse als **IP** eintragen, nicht `localhost` – Windows löst `localhost` zuerst auf IPv6 auf, was jede Anfrage um ~2 s verzögert.
+
+### EXE-Build (optional)
+
+`build_all.bat` erzeugt mit PyInstaller `dist\server\server.exe` und `dist\Komplettscript_2_0\Komplettscript_2_0.exe`.
 
 ---
 
 ## ⚙️ Konfiguration
 
-Die Konfiguration erfolgt über die integrierte **Einstellungs-Oberfläche** (⚙️ Button in der App) oder direkt in der Datei `config.json`, die beim ersten Start automatisch erzeugt wird.
-
-### Konfigurationsoptionen
+### Server: `server_config.json`
 
 | Schlüssel | Beschreibung | Standard |
 |---|---|---|
-| `server_url` | URL des Whisper-Transkriptionsservers | `https://192.168.10.51:8000/transcribe` |
-| `llm_api_url` | URL der Ollama-API | `http://localhost:11434/v1/chat/completions` |
-| `model_ambient` | Modell für Gesprächszusammenfassung | `llama3.1:8b` |
-| `model_diktat` | Modell für Diktat-Überarbeitung | `llama3.1:8b` |
-| `model_arena_a` / `model_arena_b` | Arena-Vergleichsmodelle | `llama3.1:8b` / `qwen2.5:14b` |
-| `model_arztbrief` | Modell für Arztbriefzusammenfassung | `llama3.1:8b` |
-| `auto_delete_days` | Tage nach denen Transkripte gelöscht werden (0 = aus) | `1` |
-| `input_device` | Mikrofon-Eingang (ID oder Name) | Systemstandard |
-| `loopback_device` | System-Audio Eingang | — |
-| `chunk_duration` | Aufnahme-Chunk-Dauer in Sekunden | `30` |
-| `mix_system_audio` | System-Audio mitmischen | `false` |
+| `port`, `tls` | Port und TLS (selbstsignierte CA) | `8000`, `true` |
+| `api_key` | Gemeinsamer Schlüssel; Clients senden ihn als `X-Api-Key` | leer (aus) |
+| `asr.model` | `large-v3-turbo` (schnell), `large-v3` (max. Genauigkeit), `medium`/`small` (CPU) | `large-v3-turbo` |
+| `asr.device` / `asr.compute_type` | `auto` wählt CUDA + float16, sonst CPU + int8 | `auto` |
+| `asr.batch_size`, `asr.beam_size` | Batch-Größe der Pipeline, Beam-Search | `16`, `5` |
+| `diarization.enabled` | Sprechertrennung | `true` |
+| `diarization.cluster_threshold` | Cosinus-Distanz zwischen Sprechern; kleiner = mehr Sprecher, größer = weniger | `0.3` |
+| `diarization.match_threshold` | Mindest-Ähnlichkeit zu einer angelernten Stimme | `0.45` |
+| `ollama_url` | Ollama-Adresse (vom Server aus) | `http://localhost:11434` |
+| `session_timeout_minutes` | Inaktive Sitzungen werden gelöscht | `90` |
+| `log_transcripts` | Transkripttext in der Server-Konsole (Standard: nur Statistik) | `false` |
 
-### Ollama-Vorbereitung
+### Client: `config.json` (über die Einstellungs-Oberfläche)
 
-1. **Modelle herunterladen:** Laden Sie die gewünschten Modelle mit `ollama pull` herunter, z.B.:
-   ```bash
-   ollama pull llama3.1:8b
-   ollama pull qwen2.5:14b
-   ```
-2. **System-Prompts:** Die Standard-Prompts (Ambient, Diktat, Arztbrief) sind bereits in der App hinterlegt und können in den Einstellungen angepasst werden. Für andere PVS passen Sie den Prompt an das gewünschte Ausgabeformat an.
-3. **Modellauswahl:** In den Einstellungen der App werden alle verfügbaren Ollama-Modelle automatisch als Dropdown angezeigt.
+| Schlüssel | Beschreibung | Standard |
+|---|---|---|
+| `server_url` | Praxisserver | `https://192.168.10.51:8000` |
+| `api_key`, `ca_cert_path`, `client_name` | Zugang, Zertifikat, Zimmername | – |
+| `llm_via_server` | LLM über den Praxisserver (`/llm/...`) statt direkt zu Ollama | `true` |
+| `llm_num_ctx`, `llm_temperature` | Kontextfenster und Temperatur für alle LLM-Aufrufe | `16384`, `0.2` |
+| `model_*`, `prompt_*` | Modelle und System-Prompts je Tab | s. App |
+| `diarize`, `expected_speakers` | Sprechertrennung, erwartete Sprecheranzahl (0 = automatisch) | `true`, `0` |
+| `chunk_duration`, `chunk_max_extra`, `silence_threshold` | Chunk-Länge, max. Wartezeit auf Sprechpause, Stille-Schwelle (RMS) | `20`, `8`, `0.01` |
+| `auto_delete_days` | Transkripte in `Transkripte_Raw/` nach n Tagen löschen (0 = aus) | `1` |
 
-### Server-Setup
+### Vokabular: `vokabular_medizin.txt` (Server)
 
-Starten Sie das Transkriptions-Skript auf dem Server:
-
-```bash
-# CPU-Transkription (kein CUDA nötig)
-python server_CPU.py
-
-# GPU-Transkription (NVIDIA CUDA erforderlich)
-python server_GPU_CUDA.py
-
-# GPU mit Parallelverarbeitung für mehrere Behandler
-python server_GPU_CUDA_Parallel.py
-```
+Ein Begriff pro Zeile, `#` für Kommentare. Die oberen Einträge haben Vorrang für die Whisper-Hotwords (das Prompt-Fenster ist begrenzt); alle Einträge ab 7 Zeichen werden für die automatische Korrektur ähnlich klingender Wörter genutzt. Eigene Präparate, Kollegen, Ortsnamen einfach ergänzen; nach Änderungen den Server neu starten. Zusätzlich wird – falls vorhanden – `../../wissensdatenbank_rag/Medikamente Handelsnamen.json` eingelesen.
 
 ---
 
-## 🚀 Nutzung im Praxisalltag
+## 🎤 Eigene Stimme anlernen
 
-1. **Server starten:** Transkriptionsserver wie oben beschrieben starten.
-2. **Client starten:** `python Komplettscript_1_0.py` auf dem Praxis-PC ausführen.
-3. **Dokumentieren:**
-   * **Gespräch-Tab:** Aufnahme starten → Gespräch führen → Stop & LLM-Verarbeitung.
-   * **Diktat-Tab:** Diktierte Notizen aufnehmen und durch LLM verbessern lassen.
-   * **Arena-Tab:** Zwei Modelle gleichzeitig vergleichen → Gewünschtes Modell wählen.
-   * **Arztbrief-Tab:** PDF hochladen → Zusammenfassung generieren.
-4. **Verfeinern (optional):** Im Ergebnis-Fenster per Quick-Buttons oder Freitext-Eingabe das Ergebnis anpassen.
-5. **Einfügen:** Mit **Kopieren & Schließen** oder **Strg + V** in das PVS einfügen.
+Einstellungen → *Eigene Stimme anlernen* → 25 s normal sprechen. Der Server speichert nur ein 256-dimensionales Stimm-Embedding (kein Audio) unter `enrollments/<Name>.npy`. Im Transkript erscheint diese Person dann als `ARZT` (bzw. unter dem gewählten Namen), der übrige Sprecher als `PATIENT`; bei mehr als zwei Personen `SPRECHER 1/2/…`. Ohne Anlernen heißen alle Sprecher `SPRECHER n` – der LLM-Prompt erschließt die Rollen dann aus dem Inhalt. Mehrere Behandler können jeweils ihre Stimme anlernen.
+
+---
+
+## 🌐 Server-API (für eigene Integrationen)
+
+| Methode | Pfad | Zweck |
+|---|---|---|
+| `GET` | `/health` | Status, Modell, Sprechertrennung, angelernte Stimmen |
+| `POST` | `/session` | Sitzung anlegen (`client`, `room`, `context_terms`, `expected_speakers`, `diarize`) |
+| `POST` | `/session/{id}/chunk` | WAV-Chunk (`file`, `offset`, `index`) → Text + Wortzeiten |
+| `POST` | `/session/{id}/finalize` | optional letzter Chunk; liefert Transkript mit Sprechern |
+| `DELETE` | `/session/{id}` | Sitzung löschen |
+| `POST` | `/transcribe` | Einzeltranskription (kompatibel zu v1.0), optional `diarize=true` |
+| `GET/POST/DELETE` | `/enroll` | Stimmen anlernen / auflisten / löschen |
+| `GET` | `/llm/models` | Ollama-Modelle |
+| `POST` | `/llm/chat` | Proxy zu Ollama `/api/chat` (Streaming) |
 
 ---
 
 ## 🔒 Datenschutz
 
-* **Automatische Löschung:** Transkripte im Ordner `Transkripte_Raw/` werden beim Start automatisch gelöscht, wenn sie älter als die konfigurierte Anzahl Tage sind (Standard: 1 Tag).
-* **Konfiguration:** Über `auto_delete_days` in den Einstellungen steuerbar. Setzen Sie den Wert auf `0`, um die automatische Löschung zu deaktivieren.
-* **Lokale Verarbeitung:** Alle Daten werden lokal verarbeitet — kein Cloud-Dienst nötig.
+* **Kein Cloud-Dienst:** Audio, Transkript und LLM bleiben im Praxisnetz; Verbindung per TLS.
+* **Kein Audio auf der Festplatte:** Der Server verarbeitet Chunks im Arbeitsspeicher und verwirft sie nach der Segmentierung; nur Wortzeiten und Embeddings bleiben bis zum Sitzungsende.
+* **Automatische Löschung:** Transkripte im Ordner `Transkripte_Raw/` des Clients werden nach `auto_delete_days` gelöscht; inaktive Server-Sitzungen nach `session_timeout_minutes`.
+* **Stimm-Embeddings** angelernter Behandler sind biometrische Daten – nur mit Einwilligung der betreffenden Person anlegen; Patienten werden nicht angelernt.
+* Eine schriftliche Einwilligung der Patienten zur Aufzeichnung wird dringend empfohlen.
 
 ---
 
 ## 🩺 Spezielle Features für Mediziner
 
-* **PVS-kompatible Formatierung:** Das Skript entfernt automatisch Fettdruck-Sterne (`**`) und Rauten (`##`), die in PVS-Systemen oft kryptisch dargestellt werden. Die Zeilenumbrüche werden Windows-kompatibel (`\r\n`) formatiert.
-* **Flexibles Ausgabeformat:** Der System-Prompt bestimmt die Ausgabestruktur und kann direkt in den Einstellungen bearbeitet werden. Der Standard-Prompt ist für PegaMed optimiert — für andere PVS einfach den Prompt anpassen.
-* **Follow-Up Chat:** Ergebnisse können interaktiv verfeinert werden — kürzer, länger, neu generieren oder per Freitext-Anweisung anpassen. Funktioniert in allen Tabs.
-* **Normbefunde:** Häufige Befunde wie "Herz: rein, regelmäßig" können zeitsparend per Knopfdruck ergänzt werden.
-* **Drag-and-Drop:** PDF-Arztbriefe können direkt auf die Anwendung gezogen werden.
+* **Normbefunde:** Häufige Befunde per Knopfdruck ergänzen – sie werden dem LLM als verlässliche Arztangaben gekennzeichnet übergeben.
+* **Manuelle Notizen:** Werden beim Abschluss an das Transkript angehängt.
+* **Kontextfeld:** Medikationsplan/Vorerkrankungen verbessern Erkennung und Zusammenfassung.
+* **Drag-and-Drop:** PDF-Arztbriefe direkt auf die Anwendung ziehen.
+
+---
+
+## 🔧 Fehlerbehebung
+
+| Problem | Lösung |
+|---|---|
+| Client meldet "Praxisserver nicht erreichbar" | Läuft `server.py`? Firewall-Port 8000 freigeben; IP statt `localhost`; `ca.crt` in den Einstellungen gewählt? |
+| Jede Anfrage dauert ~2 s | `localhost` durch `127.0.0.1` bzw. die Server-IP ersetzen |
+| Server startet auf CPU statt GPU | `pip install nvidia-cublas-cu12 nvidia-cudnn-cu12`; NVIDIA-Treiber aktuell? Konsole zeigt "auf cuda" |
+| Sprecher werden vertauscht/zusammengelegt | `expected_speakers` auf 2 setzen; Stimme anlernen; `cluster_threshold` anpassen (0.25 = mehr Sprecher, 0.4 = weniger) |
+| Halluzinierte Sätze bei Stille | `silence_threshold` erhöhen (z. B. 0.02), Mikrofonpegel prüfen |
+| LLM antwortet abgeschnitten | `llm_num_ctx` erhöhen (Modell muss das Kontextfenster unterstützen) |
+| Modell mit Denkmodus (qwen3, gpt-oss) antwortet langsam | Der Client sendet `think: false`; alternativ ein Modell ohne Denkmodus wählen |
 
 ---
 
 ## ⚖️ Regulatorischer Hinweis
 
-Die Funktionen **Patientenanalyse** und **Dokumentenbefragung** wurden in dieser Version deaktiviert. Obwohl technisch problemlos machbar, könnten diese Funktionen dazu führen, dass die Software regulatorisch als **Medizinprodukt** (Software as a Medical Device, SaMD) eingestuft wird. Um rechtliche Risiken für dieses Open-Source-Projekt zu vermeiden, konzentriert sich der Funktionsumfang auf reine Dokumentations- und Transkriptionshilfen sowie einfache Zusammenfassungen.
+Die Funktionen **Patientenanalyse** und **Dokumentenbefragung** bleiben deaktiviert. Sie könnten dazu führen, dass die Software regulatorisch als **Medizinprodukt** (Software as a Medical Device, SaMD) eingestuft wird. Der Funktionsumfang beschränkt sich auf Dokumentations- und Transkriptionshilfen sowie einfache Zusammenfassungen.
 
 > **Entscheidungsgrundlage:** MDR (EU) 2017/745
 
@@ -162,7 +202,7 @@ Die Funktionen **Patientenanalyse** und **Dokumentenbefragung** wurden in dieser
 
 ## ⚠️ Disclaimer / Haftungsausschluss
 
-> **Transkription & Dokumentation:** Transkripte und KI-generierte Dokumentationen sind vom behandelnden Arzt/Ärztin auf Vollständigkeit und Richtigkeit zu überprüfen. Dieses Programm dient lediglich als Dokumentationshilfe und darf die ärztliche Behandlung nicht beeinflussen.
+> **Transkription & Dokumentation:** Transkripte, Sprecherzuordnungen und KI-generierte Dokumentationen sind vom behandelnden Arzt/Ärztin auf Vollständigkeit und Richtigkeit zu überprüfen. Dieses Programm dient lediglich als Dokumentationshilfe und darf die ärztliche Behandlung nicht beeinflussen.
 
 > **Arztbrief-Zusammenfassung:** Dient ausschließlich der schnelleren Orientierung und ersetzt nicht das sorgfältige Studium des Originaldokuments.
 

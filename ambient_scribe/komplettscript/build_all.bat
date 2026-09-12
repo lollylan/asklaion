@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
 echo ============================================================
-echo   Asklaion - EXE Build Script
-echo   Erstellt ausfuehrbare Dateien fuer alle Komponenten
+echo   Asklaion v2.0 - EXE Build Script
+echo   Erstellt ausfuehrbare Dateien fuer Server und Client
 echo ============================================================
 echo.
 
@@ -20,10 +20,10 @@ if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
 
 echo.
-echo [1/4] Baue server_CPU.exe ...
+echo [1/2] Baue server.exe (Praxisserver) ...
 echo ============================================================
 python -m PyInstaller --onedir --console --noconfirm ^
-    --name server_CPU ^
+    --name server ^
     --hidden-import=uvicorn.logging ^
     --hidden-import=uvicorn.loops ^
     --hidden-import=uvicorn.loops.auto ^
@@ -39,49 +39,28 @@ python -m PyInstaller --onedir --console --noconfirm ^
     --hidden-import=uvicorn.lifespan.on ^
     --hidden-import=uvicorn.lifespan.off ^
     --hidden-import=anyio._backends._asyncio ^
+    --hidden-import=multipart ^
+    --hidden-import=python_multipart ^
     --hidden-import=ctranslate2 ^
-    server_CPU.py
+    --hidden-import=soundfile ^
+    --hidden-import=rapidfuzz ^
+    --hidden-import=sherpa_onnx ^
+    --collect-all=sherpa_onnx ^
+    --collect-all=faster_whisper ^
+    --collect-data soundfile ^
+    server.py
 
 if errorlevel 1 (
-    echo [FEHLER] Build von server_CPU fehlgeschlagen!
+    echo [FEHLER] Build von server fehlgeschlagen!
     pause
     exit /b 1
 )
 
 echo.
-echo [2/4] Baue server_GPU_CUDA_Parallel.exe ...
+echo [2/2] Baue Komplettscript_2_0.exe (Client) ...
 echo ============================================================
 python -m PyInstaller --onedir --console --noconfirm ^
-    --name server_GPU_CUDA_Parallel ^
-    --hidden-import=uvicorn.logging ^
-    --hidden-import=uvicorn.loops ^
-    --hidden-import=uvicorn.loops.auto ^
-    --hidden-import=uvicorn.protocols ^
-    --hidden-import=uvicorn.protocols.http ^
-    --hidden-import=uvicorn.protocols.http.auto ^
-    --hidden-import=uvicorn.protocols.http.h11_impl ^
-    --hidden-import=uvicorn.protocols.http.httptools_impl ^
-    --hidden-import=uvicorn.protocols.websockets ^
-    --hidden-import=uvicorn.protocols.websockets.auto ^
-    --hidden-import=uvicorn.protocols.websockets.wsproto_impl ^
-    --hidden-import=uvicorn.lifespan ^
-    --hidden-import=uvicorn.lifespan.on ^
-    --hidden-import=uvicorn.lifespan.off ^
-    --hidden-import=anyio._backends._asyncio ^
-    --hidden-import=ctranslate2 ^
-    server_GPU_CUDA_Parallel.py
-
-if errorlevel 1 (
-    echo [FEHLER] Build von server_GPU_CUDA_Parallel fehlgeschlagen!
-    pause
-    exit /b 1
-)
-
-echo.
-echo [3/4] Baue Komplettscript_1_0.exe ...
-echo ============================================================
-python -m PyInstaller --onedir --console --noconfirm ^
-    --name Komplettscript_1_0 ^
+    --name Komplettscript_2_0 ^
     --hidden-import=sounddevice ^
     --hidden-import=_sounddevice_data ^
     --collect-data sounddevice ^
@@ -89,30 +68,10 @@ python -m PyInstaller --onedir --console --noconfirm ^
     --hidden-import=PyPDF2 ^
     --hidden-import=windnd ^
     --hidden-import=pyperclip ^
-    Komplettscript_1_0.py
+    Komplettscript_2_0.py
 
 if errorlevel 1 (
-    echo [FEHLER] Build von Komplettscript_1_0 fehlgeschlagen!
-    pause
-    exit /b 1
-)
-
-echo.
-echo [4/4] Baue Komplettscript_Full_Backup.exe ...
-echo ============================================================
-python -m PyInstaller --onedir --console --noconfirm ^
-    --name Komplettscript_Full_Backup ^
-    --hidden-import=sounddevice ^
-    --hidden-import=_sounddevice_data ^
-    --collect-data sounddevice ^
-    --hidden-import=scipy.io.wavfile ^
-    --hidden-import=PyPDF2 ^
-    --hidden-import=windnd ^
-    --hidden-import=pyperclip ^
-    Komplettscript_Full_Backup.py
-
-if errorlevel 1 (
-    echo [FEHLER] Build von Komplettscript_Full_Backup fehlgeschlagen!
+    echo [FEHLER] Build von Komplettscript_2_0 fehlgeschlagen!
     pause
     exit /b 1
 )
@@ -123,14 +82,15 @@ echo   FERTIG! Alle EXE-Dateien wurden erstellt.
 echo ============================================================
 echo.
 echo   Ausgabe in: dist\
-echo     - dist\server_CPU\server_CPU.exe
-echo     - dist\server_GPU_CUDA_Parallel\server_GPU_CUDA_Parallel.exe
-echo     - dist\Komplettscript_1_0\Komplettscript_1_0.exe
-echo     - dist\Komplettscript_Full_Backup\Komplettscript_Full_Backup.exe
+echo     - dist\server\server.exe                       (Praxisserver)
+echo     - dist\Komplettscript_2_0\Komplettscript_2_0.exe (Client)
 echo.
 echo   HINWEIS: Beim Weitergeben den kompletten Ordner kopieren,
-echo   nicht nur die .exe-Datei!
+echo   nicht nur die .exe-Datei! Neben server.exe gehoeren
+echo   vokabular_medizin.txt (optional) und der Ordner models\
+echo   (wird sonst beim ersten Start automatisch geladen).
 echo.
-echo   GPU-Server benoetigt CUDA-Toolkit auf dem Zielrechner.
+echo   GPU-Server: NVIDIA-Treiber reicht, cuBLAS/cuDNN kommen
+echo   aus den pip-Paketen nvidia-cublas-cu12 / nvidia-cudnn-cu12.
 echo ============================================================
 pause

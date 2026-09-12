@@ -1,0 +1,17 @@
+# Asklaion Praxisserver (Transkription + Sprechertrennung + LLM-Proxy)
+# Python 3.10 – 3.14
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+faster-whisper>=1.2.0
+ctranslate2>=4.6
+numpy
+scipy
+soundfile
+requests
+cryptography
+rapidfuzz
+sherpa-onnx>=1.12
+# GPU (NVIDIA): cuBLAS/cuDNN als pip-Pakete, kein CUDA-Toolkit nötig
+nvidia-cublas-cu12; platform_system == "Windows" or platform_system == "Linux"
+nvidia-cudnn-cu12; platform_system == "Windows" or platform_system == "Linux"
