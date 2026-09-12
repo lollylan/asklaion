@@ -20,7 +20,7 @@ Jedes Gespräch bekommt auf dem Server eine eigene **Sitzung** – mehrere Zimme
 |---|---|---|
 | Transkription | Whisper large-v3, unbatched | large-v3-turbo mit Batch-Pipeline, Silero-VAD, Hotwords, Wortzeitstempeln – **ca. 10x schneller** (20 s Audio in 0,2–0,5 s auf einer RTX 4090) |
 | Stille / Halluzinationen | keine Behandlung | VAD entfernt Stille vor der Erkennung, bekannte Whisper-Phantomsätze ("Untertitel …") und Wiederholungsschleifen werden verworfen, stille Chunks werden gar nicht erst gesendet |
-| Chunking | harter Schnitt alle 30 s (zerschnittene Wörter) | Schnitt an der nächsten Sprechpause (Standard 20 s + max. 8 s Wartezeit) |
+| Chunking | harter Schnitt alle 30 s (zerschnittene Wörter) | Schnitt an der nächsten Sprechpause (Standard 20 s + max. 15 s Wartezeit) |
 | Sprecher | – | **ARZT / PATIENT / SPRECHER n** – die eigene Stimme kann angelernt werden |
 | Medikamente | nur über den LLM-Prompt | Praxisvokabular (`vokabular_medizin.txt`, ~700 Begriffe) als Whisper-Hotwords + automatische Korrektur ähnlich klingender Wörter ("Raemipril" → "Ramipril") + **Kontextfeld** für den Medikationsplan des Patienten |
 | Mehrbenutzer | ein Endpunkt, Temp-Dateien | Sitzungen mit eigener ID, Audio nur im Arbeitsspeicher, automatische Bereinigung |
@@ -128,7 +128,7 @@ In den **⚙ Einstellungen**: Server-Adresse (`https://<Server-IP>:8000`), `ca.c
 | `llm_num_ctx`, `llm_temperature` | Kontextfenster und Temperatur für alle LLM-Aufrufe | `16384`, `0.2` |
 | `model_*`, `prompt_*` | Modelle und System-Prompts je Tab | s. App |
 | `diarize`, `expected_speakers` | Sprechertrennung, erwartete Sprecheranzahl (0 = automatisch) | `true`, `0` |
-| `chunk_duration`, `chunk_max_extra`, `silence_threshold` | Chunk-Länge, max. Wartezeit auf Sprechpause, Stille-Schwelle (RMS) | `20`, `8`, `0.01` |
+| `chunk_duration`, `chunk_max_extra`, `silence_threshold` | Chunk-Länge, max. Wartezeit auf Sprechpause (harte Schnitte mitten im Wort kosten Wortfragmente), Stille-Schwelle (RMS) | `20`, `15`, `0.01` |
 | `auto_delete_days` | Transkripte in `Transkripte_Raw/` nach n Tagen löschen (0 = aus) | `1` |
 
 ### Vokabular: `vokabular_medizin.txt` (Server)

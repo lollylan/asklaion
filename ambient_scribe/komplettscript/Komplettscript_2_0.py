@@ -168,7 +168,7 @@ DEFAULT_CONFIG = {
     "loopback_device": None,
     "mix_system_audio": False,
     "chunk_duration": 20,
-    "chunk_max_extra": 8,
+    "chunk_max_extra": 15,
     "silence_threshold": 0.01,
     "diarize": True,
     "expected_speakers": 0,
@@ -899,7 +899,7 @@ class ModernRecorder:
 
     def chunk_timer(self):
         dur = float(config.get("chunk_duration", 20))
-        extra = float(config.get("chunk_max_extra", 8))
+        extra = float(config.get("chunk_max_extra", 15))
         thr = float(config.get("silence_threshold", 0.01))
         while self.is_recording:
             time.sleep(0.25)
@@ -908,8 +908,10 @@ class ModernRecorder:
             elapsed = self.recorder.buffer_seconds()
             if elapsed < dur:
                 continue
-            # An einer Sprechpause schneiden – notfalls nach dur+extra Sekunden hart
-            if self.recorder.tail_rms(0.4) < thr or elapsed >= dur + extra:
+            # An einer Sprechpause schneiden – notfalls nach dur+extra Sekunden hart.
+            # (Harte Schnitte mitten im Wort kosten Wortfragmente an der Chunk-Grenze,
+            #  deshalb lieber deutlich länger auf eine Pause warten.)
+            if self.recorder.tail_rms(0.3) < thr or elapsed >= dur + extra:
                 data, start = self.recorder.get_and_reset_buffer()
                 if data is not None:
                     self._enqueue_chunk(data, start, final=False)
