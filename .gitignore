@@ -1,16 +1,36 @@
-Transkripte_Raw/
-config.json
+# PyInstaller Build-Artefakte
+build/
+dist/
+*.spec
+
+# Komplettscript_Full_Backup EXE (nicht als Release hochladen)
+Komplettscript_Full_Backup.exe
+dist/Komplettscript_Full_Backup/
+
+# Python Cache
 __pycache__/
 *.pyc
+*.pyo
 
-Vorversionen/
-
-Ambient scribe/Komplettscript/Vorversionen/
-
-ambient_scribe/komplettscript/Komplettscript_Full_Backup.py
-
-# Private Schlüssel & Zertifikate (werden lokal generiert)
+# TLS Zertifikate (maschinenspezifisch)
 certs/
+
+# Konfiguration (maschinenspezifisch, enthaelt verschluesselten API-Key)
+config.json
+server_config.json
+
+# Automatisch geladene Modelle (Sprechertrennung) und angelernte Stimmen
+models/
+enrollments/
 
 # Claude Code
 .claude/
+
+# Temporaere Dateien
+temp_*.wav
+temp_*.mp3
+Transkripte_Raw/
+
+# Lokale Altversionen (nicht ins Repo)
+Vorversionen/
+Komplettscript_Full_Backup.py

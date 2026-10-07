@@ -6,7 +6,7 @@ Quellen (in dieser Reihenfolge zusammengeführt):
   1. vokabular_medizin.txt neben dem Server-Script (ein Begriff pro Zeile,
      '#' leitet Kommentare ein) – hier kann jede Praxis eigene Begriffe ergänzen.
   2. Eingebaute Grundliste (häufige Hausarzt-Präparate, Wirkstoffe, Diagnosen).
-  3. Optional: ../../wissensdatenbank_rag/Medikamente Handelsnamen.json
+  3. Optional: Medikamente Handelsnamen.json neben dem Server-Script
      (Handelsnamen + Wirkstoffe).
 
 Benötigt: pip install rapidfuzz
@@ -112,10 +112,9 @@ def _vocab_path(base_dir: str) -> Path:
 
 
 def _load_rag_json(base_dir: str) -> list:
-    """Lädt Handelsnamen/Wirkstoffe aus der RAG-JSON des Repos, falls vorhanden."""
+    """Lädt Handelsnamen/Wirkstoffe aus der Medikamenten-JSON, falls vorhanden."""
     candidates = [
         Path(base_dir) / "Medikamente Handelsnamen.json",
-        Path(base_dir).parent.parent / "wissensdatenbank_rag" / "Medikamente Handelsnamen.json",
     ]
     terms = []
     for p in candidates:
