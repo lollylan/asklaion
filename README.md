@@ -62,6 +62,29 @@ Jedes Gespräch bekommt auf dem Server eine eigene **Sitzung** – mehrere Zimme
 
 ---
 
+## ⌨️ Tastenkürzel & Freihand-Diktat
+
+Die wichtigsten Aktionen haben **systemweite Tastenkürzel** – sie funktionieren auch, wenn Asklaion im Hintergrund liegt und das PVS im Vordergrund ist. Sie lassen sich auch von Makro-Tools (Stream Deck, AutoHotkey, Maus- oder Fußschalter-Software) auslösen; dafür eignen sich die Tasten **F13–F24**, die auf normalen Tastaturen fehlen und daher nie kollidieren.
+
+| Aktion | Standard |
+|---|---|
+| Start (im aktuell gewählten Tab) | `Strg + Umschalt + F9` |
+| Pause / Weiter | `Strg + Umschalt + F10` |
+| Analyse | `Strg + Umschalt + F11` |
+| Ergebnis kopieren & schließen | `Strg + Umschalt + F12` |
+| **Freihand-Diktat** (gedrückt halten) | `Strg rechts` |
+
+**Freihand-Diktat:** In ein beliebiges Fenster klicken (PVS-Feld, Notepad, Word …), die Diktat-Taste **gedrückt halten**, sprechen, **loslassen** – der erkannte Text wird an der Cursorposition eingefügt. „neue Zeile“ und „neuer Absatz“ werden umgesetzt. Ein kleiner Hinweis unten am Bildschirm (und optional ein Signalton) zeigt, dass aufgenommen wird; er nimmt dem Zielfenster nie den Fokus.
+
+* Wird die Taste nur kurz angetippt oder zusammen mit einer anderen Taste benutzt (z. B. rechte Strg + C), passiert nichts – normale Tastenkürzel funktionieren weiter.
+* Läuft gerade eine Gesprächsaufnahme, wird sie während des Diktats angehalten und danach fortgesetzt.
+* Eingefügt wird standardmäßig über die Zwischenablage (Strg+V); deren vorheriger Inhalt – z. B. die gerade erzeugte Dokumentation – wird danach wiederhergestellt. Nimmt ein Programm kein Strg+V an, auf *Zeichen für Zeichen tippen* umstellen.
+* Optional überarbeitet das LLM den Text vorher mit dem Diktat-Prompt (langsamer).
+
+Einstellen unter **⚙ Einstellungen → Tastenkürzel**: *Festlegen* klicken und die gewünschte Kombination drücken (Esc bricht ab), oder eintippen. Ein leeres Feld schaltet das Kürzel ab.
+
+---
+
 ## 🛠️ Installation
 
 ### Server (ein Rechner im Praxisnetz)
@@ -137,6 +160,9 @@ In den **⚙ Einstellungen**: Server-Adresse (`https://<Server-IP>:8000`), `ca.c
 | `diarize`, `expected_speakers` | Sprechertrennung, erwartete Sprecheranzahl (0 = automatisch) | `true`, `0` |
 | `chunk_duration`, `chunk_max_extra`, `silence_threshold` | Chunk-Länge, max. Wartezeit auf Sprechpause (harte Schnitte mitten im Wort kosten Wortfragmente), Stille-Schwelle (RMS) | `20`, `15`, `0.01` |
 | `auto_delete_days` | Transkripte in `Transkripte_Raw/` nach n Tagen löschen (0 = aus) | `1` |
+| `hotkey_start`, `hotkey_pause`, `hotkey_analyse`, `hotkey_copy_close` | Systemweite Tastenkürzel, z. B. `ctrl+shift+f9`, `f13` (leer = aus) | `ctrl+shift+f9` … `f12` |
+| `ptt_hotkey` | Freihand-Diktat (gedrückt halten), z. B. `rctrl`, `f13` (leer = aus) | `rctrl` |
+| `ptt_insert_mode`, `ptt_llm`, `ptt_beep` | Einfügen per `paste` (Zwischenablage) oder `type`; LLM-Überarbeitung; Signalton | `paste`, `false`, `true` |
 
 ### Vokabular: `vokabular_medizin.txt` (Server)
 
@@ -196,6 +222,9 @@ Einstellungen → *Eigene Stimme anlernen* → 25 s normal sprechen. Der Server 
 | Halluzinierte Sätze bei Stille | `silence_threshold` erhöhen (z. B. 0.02), Mikrofonpegel prüfen |
 | LLM antwortet abgeschnitten | `llm_num_ctx` erhöhen (Modell muss das Kontextfenster unterstützen) |
 | Modell mit Denkmodus (qwen3, gpt-oss) antwortet langsam | Der Client sendet `think: false`; alternativ ein Modell ohne Denkmodus wählen |
+| Tastenkürzel / Freihand-Diktat reagieren in einem Programm nicht | Läuft das Programm (z. B. das PVS) *als Administrator*, erlaubt Windows keine Tasten von normalen Programmen – Asklaion dann ebenfalls als Administrator starten |
+| Virenscanner meldet die EXE | Der systemweite Tastaturhook für die Kürzel ähnelt technisch einem Keylogger (es wird nichts gespeichert oder gesendet); Ausnahme einrichten oder Kürzel leeren |
+| Diktat landet nicht im PVS, sondern nichts passiert | In den Einstellungen *Zeichen für Zeichen tippen* wählen |
 
 ---
 
@@ -219,7 +248,7 @@ Die Funktionen **Patientenanalyse** und **Dokumentenbefragung** bleiben deaktivi
 
 ## 🗄️ Ältere Versionen
 
-Die v1.x-Versionen (inkl. fertiger EXE-Dateien) liegen unter [Releases](https://github.com/lollylan/asklaion/releases); der frühere Repo-Inhalt (Archiv, n8n-Automatisierungen, Prompt-Sammlung) ist in der Git-Historie erhalten.
+Der Quellcode der v1.x-Versionen ist über die Tags `v1.1.0` und `v1.2.0` abrufbar; der frühere Repo-Inhalt (Archiv, n8n-Automatisierungen, Prompt-Sammlung) ist in der Git-Historie erhalten. Fertige EXE-Dateien werden nicht mehr angeboten – für eine eigene EXE `build_all.bat` ausführen.
 
 ## 🤝 Mitwirken
 

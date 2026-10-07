@@ -16,6 +16,9 @@ Neu in v2.0:
     und die LLM-Zusammenfassung.
   * LLM-Antworten werden gestreamt; Kontextfenster und Temperatur werden explizit
     gesetzt (kein stilles Abschneiden langer Gespräche mehr).
+  * Globale Tastenkürzel (Start / Pause / Analyse / Kopieren & Schließen), auch per
+    Makro auslösbar, und Freihand-Diktat: Taste halten, sprechen, loslassen – der
+    Text landet im gerade aktiven Fenster (PVS, Notepad, ...).
 
 Benötigt: pip install -r requirements-client.txt
 """
@@ -43,6 +46,12 @@ import pyperclip
 
 from security_utils import (encrypt_value, decrypt_value, is_encrypted,
                             open_ca_for_system_install, get_base_dir)
+import hotkeys
+
+try:
+    import winsound
+except ImportError:
+    winsound = None
 
 try:
     import urllib3
@@ -174,6 +183,16 @@ DEFAULT_CONFIG = {
     "expected_speakers": 0,
     "auto_delete_days": 1,
     "save_raw_transcripts": True,
+    # Globale Tastenkürzel (leer = aus), Format siehe hotkeys.py
+    "hotkey_start": "ctrl+shift+f9",
+    "hotkey_pause": "ctrl+shift+f10",
+    "hotkey_analyse": "ctrl+shift+f11",
+    "hotkey_copy_close": "ctrl+shift+f12",
+    # Freihand-Diktat: Taste halten = aufnehmen, loslassen = Text ins aktive Fenster
+    "ptt_hotkey": "rctrl",
+    "ptt_insert_mode": "paste",    # "paste" (Zwischenablage + Strg+V) oder "type" (Zeichen tippen)
+    "ptt_llm": False,              # Text vor dem Einfügen mit dem Diktat-Prompt überarbeiten
+    "ptt_beep": True,
 }
 
 
@@ -256,6 +275,20 @@ def audio_to_wav_bytes(data: np.ndarray) -> io.BytesIO:
     return buf
 
 
+_DICTATION_COMMANDS = (
+    (re.compile(r"[\s,;:]*\bneue[rn]?\s+absatz\b[\s,.;:]*", re.IGNORECASE), "\n\n"),
+    (re.compile(r"[\s,;:]*\bneue\s+zeile\b[\s,.;:]*", re.IGNORECASE), "\n"),
+)
+
+
+def apply_dictation_commands(text: str) -> str:
+    """Gesprochene Steuerbefehle ("neue Zeile", "neuer Absatz") in Umbrüche umsetzen."""
+    t = (text or "").strip()
+    for rx, repl in _DICTATION_COMMANDS:
+        t = rx.sub(repl, t)
+    return t.strip(" ")
+
+
 def extract_context_terms(text: str) -> list:
     """Zieht Begriffe (Präparate, Diagnosen) aus dem Kontextfeld für Whisper-Hotwords."""
     terms = []
@@ -336,6 +369,15 @@ class ServerClient:
             files = {"file": ("chunk.wav", audio_to_wav_bytes(data), "audio/wav")}
             payload = {"offset": f"{offset:.3f}", "index": str(index)}
         r = self._post(f"/session/{sid}/finalize", timeout=300, files=files, data=payload)
+        r.raise_for_status()
+        return r.json()
+
+    def transcribe(self, data, context_terms=None):
+        """Einzeltranskription ohne Sitzung/Sprechertrennung (Freihand-Diktat)."""
+        r = self._post("/transcribe", timeout=120,
+                       files={"file": ("dictation.wav", audio_to_wav_bytes(data), "audio/wav")},
+                       data={"context_terms": json.dumps(context_terms or [], ensure_ascii=False),
+                             "diarize": "false"})
         r.raise_for_status()
         return r.json()
 
@@ -461,6 +503,7 @@ class AudioRecorder:
         self.sample_rate = SAMPLE_RATE
         self.samples_recorded = 0      # Gesamt (ohne Pausen)
         self.buffer_start_sample = 0   # Position des aktuellen Chunk-Anfangs
+        self.last_error = ""
 
     def start(self, mic_id, loop_id=None, use_loopback=False):
         self.running = True
@@ -482,6 +525,7 @@ class AudioRecorder:
             self.stream_mic.start()
         except Exception as e:
             print(f"Error starting mic: {e}")
+            self.last_error = str(e)
             self.running = False
             return False
 
@@ -595,6 +639,51 @@ DISCLAIMER_TRANSCRIPTION = (
 BG = "#f5f7f9"
 
 
+class StatusOverlay:
+    """Kleiner Hinweis unten in der Bildschirmmitte, immer im Vordergrund, stiehlt nie den Fokus –
+    zeigt bei Tastenkürzeln und Freihand-Diktat, was gerade passiert, auch wenn Asklaion im Hintergrund ist.
+    Nur aus dem Tk-Haupt-Thread aufrufen."""
+
+    def __init__(self, root):
+        self.root = root
+        self.win = tk.Toplevel(root)
+        self.win.overrideredirect(True)
+        self.win.attributes("-topmost", True)
+        try:
+            self.win.attributes("-alpha", 0.94)
+        except tk.TclError:
+            pass
+        self.label = tk.Label(self.win, text="", font=("Segoe UI", 11, "bold"), fg="white", bg="#34495e",
+                              padx=18, pady=9)
+        self.label.pack()
+        # Statt withdraw/deiconify (würde den Fokus holen) wird das Fenster nur verschoben.
+        self.win.geometry("+-10000+-10000")
+        hotkeys.make_no_activate(self.win)
+        self._after = None
+
+    def show(self, text, color="#34495e"):
+        if self._after:
+            self.root.after_cancel(self._after)
+            self._after = None
+        self.label.config(text=text, bg=color)
+        self.win.update_idletasks()
+        w, h = self.win.winfo_reqwidth(), self.win.winfo_reqheight()
+        x = (self.win.winfo_screenwidth() - w) // 2
+        y = self.win.winfo_screenheight() - h - 90
+        self.win.attributes("-topmost", True)   # vor geometry(), sonst setzt Tk die alte Position zurück
+        self.win.geometry(f"{w}x{h}+{x}+{y}")
+
+    def flash(self, text, color="#34495e", ms=1800):
+        self.show(text, color)
+        self._after = self.root.after(ms, self.hide)
+
+    def hide(self):
+        if self._after:
+            self.root.after_cancel(self._after)
+            self._after = None
+        self.win.geometry("+-10000+-10000")
+
+
 class ModernRecorder:
     TAB_AMBIENT, TAB_DIKTAT, TAB_ARENA, TAB_ARZTBRIEF = 0, 1, 2, 3
 
@@ -623,11 +712,27 @@ class ModernRecorder:
         self.ui_queue = queue.Queue()
         self._meter_last = 0.0
 
+        # Freihand-Diktat (Push-to-Talk): eigener Recorder, Aufträge werden der Reihe nach
+        # transkribiert und eingefügt, damit die Reihenfolge im Zielfenster stimmt.
+        self.ptt_recorder = AudioRecorder(self.update_meter)
+        self.ptt_events = queue.Queue()
+        self.ptt_jobs = queue.Queue()
+        self.ptt_active = False
+        self.ptt_gen = 0
+        self.ptt_started = 0.0
+        self.ptt_target = None
+        self.ptt_paused_ambient = False
+        self.hotkeys = hotkeys.HotkeyManager(on_error=self.log)
+
         self._setup_ui()
+        self.overlay = StatusOverlay(self.root)
         self.root.after(30, self._process_ui_queue)
         self._start_upload_worker()
+        threading.Thread(target=self._ptt_control_loop, daemon=True).start()
+        threading.Thread(target=self._ptt_worker, daemon=True).start()
         self._cleanup_old_transcripts()
         threading.Thread(target=self._check_server, daemon=True).start()
+        self._init_hotkeys()
 
     # ------------------------------------------------------------------ UI-Queue
     def _ui(self, fn):
@@ -878,7 +983,8 @@ class ModernRecorder:
         loop_id = config.get("loopback_device")
         use_loop = config.get("mix_system_audio", False)
         if not self.recorder.start(mic_id, loop_id, use_loop):
-            messagebox.showerror("Fehler", "Konnte Audio-Gerät nicht starten. Bitte Mikrofon in den Einstellungen prüfen.")
+            messagebox.showerror("Fehler", "Konnte Audio-Gerät nicht starten. Bitte Mikrofon in den Einstellungen prüfen."
+                                 f"\n\n{self.recorder.last_error}")
             return
         self.is_recording = True
 
@@ -926,6 +1032,8 @@ class ModernRecorder:
         self.upload_queue.put(("final" if final else "chunk", self.chunk_counter, data, start))
 
     def toggle_pause(self):
+        if not self.is_recording:
+            return
         self.recorder.paused = not self.recorder.paused
         state = "PAUSIERT" if self.recorder.paused else "AUFNAHME"
         self.set_status(state, "#f39c12" if self.recorder.paused else "#e74c3c")
@@ -1152,7 +1260,7 @@ class ModernRecorder:
     @staticmethod
     def _empty_chat_session():
         return {"messages": [], "model": None, "window": None, "result_text": None,
-                "input_entry": None, "btn_frame": None, "user_text": None}
+                "input_entry": None, "btn_frame": None, "user_text": None, "close": None}
 
     def _reset_chat_session(self):
         self.chat_session = self._empty_chat_session()
@@ -1226,6 +1334,7 @@ class ModernRecorder:
             win.destroy()
         tk.Button(win, text="Kopieren & Schließen", command=close, bg="#34495e", fg="white", pady=10).pack(fill="x")
         win.protocol("WM_DELETE_WINDOW", close)
+        cs["close"] = close
         self._set_chat_ui_enabled(False)
         t.insert(tk.END, "… LLM arbeitet …")
         return win
@@ -1395,6 +1504,192 @@ class ModernRecorder:
         self.btn_pdf.config(state="normal", bg="#3498db")
         self.arztbrief_status.config(text="✅ Analyse abgeschlossen", fg="#27ae60")
 
+    # ------------------------------------------------------------ Globale Tastenkürzel
+    HOTKEY_ACTIONS = (
+        ("hotkey_start", "Start"),
+        ("hotkey_pause", "Pause / Weiter"),
+        ("hotkey_analyse", "Analyse"),
+        ("hotkey_copy_close", "Ergebnis kopieren & schließen"),
+    )
+
+    def _init_hotkeys(self):
+        if not hotkeys.IS_WINDOWS:
+            return
+        if not self.hotkeys.start():
+            self.log("Globale Tastenkürzel nicht verfügbar.")
+            return
+        self._apply_hotkeys()
+
+    def _apply_hotkeys(self):
+        if not self.hotkeys.running:
+            return
+        handlers = {"hotkey_start": self._hk_start, "hotkey_pause": self._hk_pause,
+                    "hotkey_analyse": self._hk_analyse, "hotkey_copy_close": self._hk_copy_close}
+        # Rückrufe kommen aus dem Hotkey-Thread -> Tk-Aufrufe über die UI-Queue
+        actions = {label: (config.get(key, ""), lambda h=handlers[key]: self._ui(h))
+                   for key, label in self.HOTKEY_ACTIONS}
+        ptt = (config.get("ptt_hotkey", ""), lambda: self.ptt_events.put(self._ptt_press),
+               lambda: self.ptt_events.put(self._ptt_release), lambda: self.ptt_events.put(self._ptt_cancel))
+        for err in self.hotkeys.set_bindings(actions, ptt):
+            self.log(f"Tastenkürzel: {err}")
+        active = [f"{label} = {hotkeys.format_combo(config.get(key, ''))}"
+                  for key, label in self.HOTKEY_ACTIONS if config.get(key)]
+        if config.get("ptt_hotkey"):
+            active.append(f"Diktat halten = {hotkeys.format_combo(config['ptt_hotkey'])}")
+        if active:
+            self.log("Tastenkürzel: " + "; ".join(active))
+
+    def _toast(self, text, color, ms=1800):
+        if not self.ptt_active:   # den Diktat-Hinweis nicht überdecken
+            self.overlay.flash(text, color, ms)
+
+    def _hk_start(self):
+        if self.is_recording:
+            return
+        if self.notebook.index(self.notebook.select()) not in (self.TAB_AMBIENT, self.TAB_DIKTAT, self.TAB_ARENA):
+            self.notebook.select(self.tab_ambient)
+        self.start_recording()
+        if self.is_recording:
+            tab = self.notebook.tab(self.notebook.select(), "text").strip()
+            self._toast(f"Aufnahme läuft ({tab})", "#c0392b")
+
+    def _hk_pause(self):
+        if not self.is_recording:
+            return
+        self.toggle_pause()
+        if self.recorder.paused:
+            self._toast("Aufnahme pausiert", "#d35400")
+        else:
+            self._toast("Aufnahme läuft weiter", "#c0392b")
+
+    def _hk_analyse(self):
+        if not self.is_recording:
+            return
+        self.stop_recording()
+        self._toast("Analyse läuft …", "#2980b9")
+
+    def _hk_copy_close(self):
+        cs = self.chat_session
+        if not cs.get("close"):
+            return
+        entry = cs.get("input_entry")
+        if entry and entry.winfo_exists() and str(entry.cget("state")) == "disabled":
+            self._toast("LLM arbeitet noch …", "#7f8c8d")
+            return
+        cs["close"]()
+        self._toast("Ergebnis in der Zwischenablage", "#27ae60")
+
+    # ------------------------------------------------------------ Freihand-Diktat (Push-to-Talk)
+    # _ptt_press/_release/_cancel laufen nacheinander in einem eigenen Steuer-Thread (ein
+    # hängendes Mikrofon blockiert so nicht die übrigen Kürzel); Transkription und Einfügen
+    # erledigt _ptt_worker.
+    def _ptt_control_loop(self):
+        while True:
+            fn = self.ptt_events.get()
+            try:
+                fn()
+            except Exception as e:
+                self.log(f"Diktat-Fehler: {e}")
+
+    def _ptt_press(self):
+        if self.ptt_active:
+            return
+        self.ptt_target = hotkeys.foreground_window()
+        self.ptt_paused_ambient = self.is_recording and not self.recorder.paused
+        if self.ptt_paused_ambient:
+            self.recorder.paused = True   # laufendes Gespräch solange anhalten
+        if not self.ptt_recorder.start(config.get("input_device")):
+            self._ptt_resume_ambient()
+            self.log(f"Diktat: Mikrofon konnte nicht gestartet werden – {self.ptt_recorder.last_error}")
+            self._ui(lambda: self.overlay.flash("Mikrofon konnte nicht gestartet werden (Details im Log)",
+                                                "#c0392b", 3000))
+            return
+        self.ptt_active = True
+        self.ptt_started = time.time()
+        self.ptt_gen += 1
+        threading.Timer(0.25, self._ptt_feedback, args=(self.ptt_gen,)).start()
+
+    def _ptt_feedback(self, gen):
+        # Erst nach kurzem Halten melden: die rechte Strg-Taste wird auch für normale Kürzel
+        # (Strg+C) benutzt – dann soll weder Hinweis noch Signalton kommen.
+        if not self.ptt_active or gen != self.ptt_gen:
+            return
+        self._ui(lambda: self.overlay.show("Diktat – sprechen, zum Einfügen loslassen", "#c0392b"))
+        if winsound and config.get("ptt_beep", True):
+            try:
+                winsound.Beep(1100, 60)
+            except RuntimeError:
+                pass
+
+    def _ptt_resume_ambient(self):
+        if self.ptt_paused_ambient and self.is_recording:
+            self.recorder.paused = False
+        self.ptt_paused_ambient = False
+
+    def _ptt_stop_recorder(self):
+        self.ptt_active = False
+        data, _ = self.ptt_recorder.stop()
+        self._ptt_resume_ambient()
+        return data
+
+    def _ptt_release(self):
+        if not self.ptt_active:
+            return
+        held = time.time() - self.ptt_started
+        data = self._ptt_stop_recorder()
+        if data is None or held < 0.5:   # nur angetippt
+            self._ui(self._ptt_overlay_idle)
+            return
+        self.ptt_jobs.put((data, self.ptt_target))
+        self._ui(self._ptt_overlay_idle)
+
+    def _ptt_cancel(self):
+        if self.ptt_active:
+            self._ptt_stop_recorder()
+            self._ui(self._ptt_overlay_idle)
+
+    def _ptt_overlay_idle(self, text=None, color="#7f8c8d"):
+        """Overlay nach einem Diktat zurücksetzen (Tk-Thread) – nicht, wenn schon das nächste läuft."""
+        if self.ptt_active:
+            return
+        if self.ptt_jobs.unfinished_tasks:
+            self.overlay.show("Diktat wird transkribiert …", "#2980b9")
+        elif text:
+            self.overlay.flash(text, color, 2500)
+        else:
+            self.overlay.hide()
+
+    def _ptt_worker(self):
+        while True:
+            data, target = self.ptt_jobs.get()
+            msg = None
+            try:
+                text = self._ptt_transcribe(data)
+                if text:
+                    hotkeys.insert_text(text, config.get("ptt_insert_mode", "paste"), target)
+                    self.log(f"Diktat eingefügt ({len(text.strip())} Zeichen).")
+                else:
+                    msg = ("Nichts erkannt", "#7f8c8d")
+            except Exception as e:
+                self.log(f"Diktat-Fehler: {e}")
+                msg = (f"Diktat fehlgeschlagen: {str(e)[:70]}", "#c0392b")
+            finally:
+                self.ptt_jobs.task_done()
+            self._ui(lambda m=msg: self._ptt_overlay_idle(*m) if m else self._ptt_overlay_idle())
+
+    def _ptt_transcribe(self, data):
+        thr = float(config.get("silence_threshold", 0.01))
+        if not len(data) or float(np.sqrt(np.mean(data ** 2))) < thr * 0.5:
+            return ""
+        text = apply_dictation_commands(SERVER.transcribe(data).get("text", ""))
+        if text and config.get("ptt_llm", False):
+            self._ui(lambda: None if self.ptt_active else self.overlay.show("LLM überarbeitet das Diktat …", "#2980b9"))
+            reply = LLM.chat(config.get("model_diktat"), self._build_messages(config.get("prompt_diktat", ""), text))
+            text = clean_for_pvs(reply)
+        if text and not text[-1].isspace():
+            text += " "   # mehrere Diktate hintereinander nicht zusammenkleben
+        return text
+
     # ------------------------------------------------------------ Einstellungen
     def open_settings(self):
         win = tk.Toplevel(self.root)
@@ -1531,6 +1826,62 @@ class ModernRecorder:
         lbl_enroll.pack(anchor="w", padx=10)
         threading.Thread(target=lambda: self._ui(refresh_enrolled), daemon=True).start()
 
+        heading("Tastenkürzel (systemweit, auch per Makro auslösbar)")
+        hk_entries = {}
+        capture_btn = {"btn": None}
+
+        def finish_capture(entry, btn, combo):
+            if combo is not None:
+                entry.delete(0, tk.END)
+                entry.insert(0, hotkeys.format_combo(combo))
+            if btn.winfo_exists():
+                btn.config(text="Festlegen", bg="#ecf0f1")
+            capture_btn["btn"] = None
+
+        def start_capture(entry, btn):
+            if not self.hotkeys.running:
+                messagebox.showinfo("Tastenkürzel", "Der Tastaturhook läuft nicht – bitte das Kürzel eintippen, "
+                                    "z. B. 'Strg + Umschalt + F9'.", parent=win)
+                return
+            if capture_btn["btn"] and capture_btn["btn"].winfo_exists():
+                capture_btn["btn"].config(text="Festlegen", bg="#ecf0f1")
+            capture_btn["btn"] = btn
+            btn.config(text="Tasten drücken … (Esc)", bg="#f9e79f")
+            self.hotkeys.capture(lambda combo: self._ui(lambda: finish_capture(entry, btn, combo)))
+
+        def hotkey_row(label_text, key):
+            tk.Label(content, text=label_text, font=("Segoe UI", 9, "bold")).pack(anchor="w", padx=10, pady=(8, 0))
+            row = tk.Frame(content)
+            row.pack(padx=10, fill="x")
+            e = tk.Entry(row, width=30)
+            e.insert(0, hotkeys.format_combo(config.get(key, "")))
+            e.pack(side="left", fill="x", expand=True)
+            b = tk.Button(row, text="Festlegen", bg="#ecf0f1", font=("Segoe UI", 8), relief="flat", width=20)
+            b.config(command=lambda: start_capture(e, b))
+            b.pack(side="left", padx=4)
+            tk.Button(row, text="Leeren", bg="#ecf0f1", font=("Segoe UI", 8), relief="flat",
+                      command=lambda: e.delete(0, tk.END)).pack(side="left")
+            hk_entries[key] = e
+
+        for key, label in self.HOTKEY_ACTIONS:
+            hotkey_row(label, key)
+        hotkey_row("Freihand-Diktat (gedrückt halten, z. B. Strg rechts)", "ptt_hotkey")
+        tk.Label(content, text="Ins Zielfenster klicken (PVS-Feld, Notepad …), Taste halten, sprechen, loslassen – "
+                 "der Text wird an der Cursorposition eingefügt. „neue Zeile“ und „neuer Absatz“ werden umgesetzt. "
+                 "Ein leeres Feld schaltet das Kürzel ab.",
+                 font=("Segoe UI", 8), fg="#7f8c8d", wraplength=600, justify="left").pack(anchor="w", padx=10, pady=(2, 0))
+        var_ptt_mode = tk.StringVar(value=config.get("ptt_insert_mode", "paste"))
+        tk.Radiobutton(content, text="Einfügen über die Zwischenablage (Strg+V, schnell; Zwischenablage bleibt erhalten)",
+                       variable=var_ptt_mode, value="paste").pack(anchor="w", padx=10, pady=(6, 0))
+        tk.Radiobutton(content, text="Zeichen für Zeichen tippen (wenn das Programm Strg+V nicht annimmt)",
+                       variable=var_ptt_mode, value="type").pack(anchor="w", padx=10)
+        var_ptt_llm = tk.BooleanVar(value=config.get("ptt_llm", False))
+        tk.Checkbutton(content, text="Diktat vor dem Einfügen mit dem Diktat-Prompt überarbeiten (LLM, langsamer)",
+                       variable=var_ptt_llm).pack(anchor="w", padx=10)
+        var_ptt_beep = tk.BooleanVar(value=config.get("ptt_beep", True))
+        tk.Checkbutton(content, text="Signalton, sobald die Diktat-Aufnahme läuft", variable=var_ptt_beep).pack(anchor="w", padx=10)
+        win.bind("<Destroy>", lambda e: self.hotkeys.cancel_capture() if e.widget is win else None)
+
         heading("Sprachmodell (LLM)")
         var_via = tk.BooleanVar(value=config.get("llm_via_server", True))
         tk.Checkbutton(content, text="LLM über den Praxisserver ansprechen (empfohlen)", variable=var_via).pack(anchor="w", padx=10, pady=(8, 0))
@@ -1601,6 +1952,23 @@ class ModernRecorder:
                 return default
 
         def save():
+            new_hotkeys, seen = {}, {}
+            labels = dict(self.HOTKEY_ACTIONS, ptt_hotkey="Freihand-Diktat")
+            for key, e in hk_entries.items():
+                err = hotkeys.validate_combo(e.get())
+                combo = hotkeys.normalize_combo(e.get())
+                if not err and combo in seen:
+                    err = f"schon für '{labels[seen[combo]]}' vergeben"
+                if err:
+                    messagebox.showerror("Tastenkürzel", f"{labels[key]}: {err}", parent=win)
+                    return
+                if combo:
+                    seen[combo] = key
+                new_hotkeys[key] = combo
+            config.update(new_hotkeys)
+            config["ptt_insert_mode"] = var_ptt_mode.get()
+            config["ptt_llm"] = var_ptt_llm.get()
+            config["ptt_beep"] = var_ptt_beep.get()
             config["server_url"] = e_server.get().strip().rstrip("/")
             config["api_key"] = e_apikey.get().strip()
             config["client_name"] = e_client.get().strip()
@@ -1635,6 +2003,7 @@ class ModernRecorder:
             win.unbind_all("<MouseWheel>")
             win.destroy()
             self.log("Einstellungen gespeichert.")
+            self._apply_hotkeys()
             threading.Thread(target=self._check_server, daemon=True).start()
 
         btn_top_save.config(command=save)
